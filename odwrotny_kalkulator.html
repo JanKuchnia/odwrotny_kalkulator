@@ -447,50 +447,35 @@
     .modal-przycisk.err:hover { background: #b91c1c; }
     .modal-przycisk:active { transform: scale(0.97); }
 
-    /* ── DZIELENIE SŁUPKOWE (grid) ── */
-    .dz-container {
-      width: 100%;
+    /* ── DZIELENIE PISEMNE ── */
+    .dz-wrap {
       overflow-x: auto;
-      overflow-y: visible;
-      padding-bottom: 4px;
-    }
-
-    .dz-inner {
-      display: inline-block;
-      min-width: 100%;
-    }
-
-    .dz-header {
       display: flex;
-      align-items: flex-end;
-      margin-bottom: 0;
+      justify-content: center;
+      padding: 4px 0;
     }
 
-    .dz-wynik-row {
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 2px;
+    .dz-outer {
+      display: inline-flex;
+      flex-direction: row;
+      align-items: flex-start;
     }
 
-    .dz-dzielnik-box {
+    /* Lewa część: dzielna + kroki */
+    .dz-left {
       display: flex;
-      align-items: center;
-      padding: 0 10px 0 4px;
-      height: 48px;
-      font-family: 'DM Mono', monospace;
-      font-size: 28px;
-      font-weight: 500;
-      color: #1c1917;
-      border-right: 2.5px solid #334155;
-      border-bottom: 2.5px solid #334155;
+      flex-direction: column;
       flex-shrink: 0;
     }
 
-    .dz-dzielna-row {
+    /* Wiersz dzielnej */
+    .dz-dzielna {
       display: flex;
+      align-items: center;
     }
 
-    .dz-cyfra {
+    /* Pojedyncza statyczna cyfra */
+    .dz-c {
       width: 44px;
       height: 48px;
       display: flex;
@@ -500,93 +485,107 @@
       font-size: 28px;
       font-weight: 500;
       color: #1c1917;
-    }
-
-    .dz-steps {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .dz-row {
-      display: flex;
-      align-items: center;
-      min-height: 42px;
-    }
-
-    .dz-spacer {
       flex-shrink: 0;
     }
 
-    .dz-minus-cell {
-      width: 28px;
-      height: 42px;
+    /* Kolumna operatora (minus lub puste) */
+    .dz-op {
+      width: 32px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'DM Mono', monospace;
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 600;
       color: #2563eb;
       flex-shrink: 0;
     }
 
-    .dz-no-minus {
-      width: 28px;
-      flex-shrink: 0;
-    }
-
-    .dz-line-row {
+    /* Wiersz kroku (mnożenie / reszta / bieżąca) */
+    .dz-srow {
       display: flex;
       align-items: center;
-      margin: 1px 0;
+      justify-content: flex-end;
+      height: 44px;
+      box-sizing: border-box;
     }
 
-    .dz-line-seg {
+    /* Kreska pozioma w krokach */
+    .dz-line {
       height: 2.5px;
       background: #334155;
       border-radius: 1px;
+      margin: 1px 0;
       flex-shrink: 0;
     }
 
-    .dz-input {
-      height: 42px;
+    /* Prawa część: dzielnik + wynik */
+    .dz-right {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      border-left: 3px solid #334155;
+    }
+
+    .dz-dzielnik {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px 0 6px;
+      font-family: 'DM Mono', monospace;
+      font-size: 28px;
+      font-weight: 500;
+      color: #1c1917;
+      border-bottom: 2.5px solid #334155;
+      flex-shrink: 0;
+    }
+
+    .dz-wynik {
+      display: flex;
+      flex-shrink: 0;
+    }
+
+    /* Pole input — jedna cyfra */
+    .dz-f {
+      width: 44px;
+      height: 44px;
       font-family: 'DM Mono', monospace;
       font-size: 26px;
       font-weight: 500;
       text-align: center;
-      background: #f1f5f9;
+      background: #f8fafc;
       border: none;
       border-bottom: 2.5px solid #cbd5e1;
-      border-radius: 6px 6px 0 0;
+      border-radius: 4px 4px 0 0;
       outline: none;
       padding: 0;
-      transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
-      caret-color: #2563eb;
       flex-shrink: 0;
+      transition: background 0.15s, border-color 0.15s;
+      caret-color: #2563eb;
     }
-
-    .dz-input:focus {
+    .dz-f:focus {
       border-bottom-color: #2563eb;
       background: #eff6ff;
-      box-shadow: 0 3px 10px rgba(37,99,235,0.15);
+      border-radius: 4px 4px 0 0;
     }
+    .dz-f--wynik  { color: #2563eb; border-bottom-color: #93c5fd; height: 48px; background: #f0f7ff; }
+    .dz-f--wynik:focus { background: #dbeafe; }
+    .dz-f--mn     { color: #d97706; border-bottom-color: #fcd34d; background: #fffbeb; }
+    .dz-f--reszta { color: #7c3aed; border-bottom-color: #c4b5fd; background: #faf5ff; }
+    .dz-f--akt    { color: #0369a1; border-bottom-color: #7dd3fc; background: #f0f9ff; }
+    .dz-f.poprawne { color: #16a34a !important; border-bottom-color: #16a34a !important; background: #f0fdf4; }
+    .dz-f.bledne   { color: #dc2626 !important; border-bottom-color: #dc2626 !important; background: #fef2f2; animation: shake 0.4s ease; }
 
-    .dz-input.poprawne { color: #16a34a !important; border-bottom-color: #16a34a !important; background: #f0fdf4; }
-    .dz-input.bledne   { color: #dc2626 !important; border-bottom-color: #dc2626 !important; background: #fef2f2; animation: shake 0.4s ease; }
-
-    .dz-input--wynik  { color: #2563eb; border-bottom-color: #93c5fd; }
-    .dz-input--mn     { color: #d97706; border-bottom-color: #fcd34d; }
-    .dz-input--reszta { color: #7c3aed; border-bottom-color: #c4b5fd; }
-    .dz-input--akt    { color: #0369a1; border-bottom-color: #7dd3fc; }
-
-    .dz-reszta-label {
+    .dz-r-label {
       font-family: 'DM Mono', monospace;
       font-size: 12px;
       font-weight: 500;
       color: #7c3aed;
       letter-spacing: 0.05em;
-      text-transform: uppercase;
-      margin-left: 6px;
+      display: flex;
+      align-items: center;
+      padding-left: 4px;
       white-space: nowrap;
     }
   </style>
@@ -895,279 +894,202 @@
     }, 200);
   }
 
-  // Generuje wszystkie pola do klasycznego dzielenia słupkowego
-  // Każdy krok: cyfra wyniku, mnożenie, reszta
   let dzPolaInfo = []; // {id, oczekiwana}
 
-  function poleDz(id, oczekiwana, klasa, szerInp) {
-    const inp = document.createElement('input');
-    inp.type = 'text';
-    inp.inputMode = 'numeric';
-    inp.maxLength = String(oczekiwana).length > 1 ? 2 : 1;
-    inp.className = 'dz-pole ' + klasa;
-    inp.id = 'dz-' + id;
-    inp.autocomplete = 'off';
-    inp.style.width = (szerInp || 40) + 'px';
-    dzPolaInfo.push({ id: 'dz-' + id, oczekiwana: String(oczekiwana) });
-    inp.addEventListener('input', function() {
-      this.value = this.value.replace(/[^0-9]/g, '').slice(0, inp.maxLength);
-    });
-    inp.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') sprawdz();
-    });
-    return inp;
-  }
+  // ══════════════════════════════════════════════════════
+  // DZIELENIE PISEMNE — nowa implementacja
+  // Każda cyfra = osobny input. Wiersze wyrównane przez
+  // padding-right = (N-1-colPrawy)*COL_W
+  // ══════════════════════════════════════════════════════
 
   function renderDzielenie(sl, a, b, wynik) {
     dzPolaInfo = [];
     sl.innerHTML = '';
     sl.style.alignItems = 'flex-start';
     sl.style.width = '100%';
-    sl.style.overflow = 'visible';
+
+    const OP_W  = 32;
+    const COL_W = 44;
 
     const sA = String(a);
     const sW = String(wynik);
-    const N = sA.length;
-    const CW = 44;    // szerokość jednej kolumny cyfry (px)
-    const MINUS_W = 28; // szerokość kolumny z minusem
+    const N  = sA.length;
+    const M  = sW.length;
+    const leftW = OP_W + N * COL_W;
 
-    // Ile cyfr dzielnej bierze pierwszy krok
-    const pierwsze = N - sW.length + 1;
-
-    // Oblicz wszystkie kroki algorytmu
+    const pierwsze = N - M + 1;
     const kroki = [];
     let resztaKrok = 0, poz = 0;
-    for (let k = 0; k < sW.length; k++) {
+    for (let k = 0; k < M; k++) {
       let biezaca, colPrawy;
       if (k === 0) {
-        biezaca = parseInt(sA.slice(0, pierwsze));
+        biezaca  = parseInt(sA.slice(0, pierwsze));
         colPrawy = pierwsze - 1;
-        poz = pierwsze;
+        poz      = pierwsze;
       } else {
-        biezaca = resztaKrok * 10 + parseInt(sA[poz]);
+        biezaca  = resztaKrok * 10 + parseInt(sA[poz]);
         colPrawy = poz;
         poz++;
       }
       const cyfraWyniku = parseInt(sW[k]);
-      const mnozenie = cyfraWyniku * b;
-      const nowaReszta = biezaca - mnozenie;
+      const mnozenie    = cyfraWyniku * b;
+      const nowaReszta  = biezaca - mnozenie;
       kroki.push({ biezaca, colPrawy, mnozenie, nowaReszta });
       resztaKrok = nowaReszta;
     }
 
-    // Sekwencyjna lista id pól (dla Tab/Enter nawigacji)
     const sekwencja = [];
 
-    // ── Pomocnicze: input ──
-    function mkInput(id, oczek, klasa) {
-      const s = String(oczek);
+    function mkInp(rawId, oczek, klasa) {
+      const id  = 'dz-' + rawId;
       const inp = document.createElement('input');
-      inp.type = 'text';
-      inp.inputMode = 'numeric';
-      inp.maxLength = s.length > 1 ? s.length : 1;
-      inp.className = 'dz-input ' + klasa;
-      inp.id = 'dz-' + id;
+      inp.type         = 'text';
+      inp.inputMode    = 'numeric';
+      inp.maxLength    = 1;
+      inp.className    = 'dz-f ' + klasa;
+      inp.id           = id;
       inp.autocomplete = 'off';
-      inp.style.width = (s.length * CW) + 'px';
+      dzPolaInfo.push({ id, oczekiwana: String(oczek) });
+      sekwencja.push(id);
       inp.addEventListener('input', function() {
-        this.value = this.value.replace(/[^0-9]/g, '').slice(0, inp.maxLength);
-        if (this.value.length === inp.maxLength) przejdzDz(id);
+        this.value = this.value.replace(/[^0-9]/g, '').slice(-1);
+        if (this.value.length === 1) dzNav(rawId, 1);
       });
       inp.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') przejdzDz(id);
-        if (e.key === 'Backspace' && this.value === '') cofnijDz(id);
+        if (e.key === 'Enter')                          dzNav(rawId,  1);
+        if (e.key === 'Backspace' && this.value === '') dzNav(rawId, -1);
       });
-      dzPolaInfo.push({ id: 'dz-' + id, oczekiwana: s });
-      sekwencja.push('dz-' + id);
       return inp;
     }
 
-    // ── Pomocnicze: wiersz z flex i offsetem ──
-    // offsetKol = ile pełnych kolumn CW od lewej (przed minusem/liczbą)
-    // hasMinus  = czy wstawić minus po lewej
-    function mkRow(offsetKol, hasMinus) {
+    function dzNav(rawId, dir) {
+      const idx = sekwencja.indexOf('dz-' + rawId);
+      const nxt = idx + dir;
+      if (nxt >= 0 && nxt < sekwencja.length) {
+        const el = document.getElementById(sekwencja[nxt]);
+        if (el) { if (dir === -1) el.value = ''; el.focus(); }
+      } else if (dir === 1 && idx === sekwencja.length - 1) {
+        sprawdz();
+      }
+    }
+
+    // Wiersz kroku: padding-right wyrównuje ostatnią cyfrę do kolumny colPrawy
+    function mkSRow(colPrawy, hasMinus) {
       const row = document.createElement('div');
-      row.className = 'dz-row';
-      const spacerW = (offsetKol * CW) + (hasMinus ? 0 : MINUS_W);
-      const spacer = document.createElement('div');
-      spacer.className = 'dz-spacer';
-      spacer.style.width = spacerW + 'px';
-      row.appendChild(spacer);
+      row.className      = 'dz-srow';
+      row.style.width    = leftW + 'px';
+      row.style.paddingRight = ((N - 1 - colPrawy) * COL_W) + 'px';
       if (hasMinus) {
         const m = document.createElement('div');
-        m.className = 'dz-minus-cell';
+        m.className   = 'dz-op';
         m.textContent = '−';
         row.appendChild(m);
       }
       return row;
     }
 
-    // ── Pomocnicze: kreska ──
-    function mkLine(offsetKol, liczbaCyfr) {
-      const row = document.createElement('div');
-      row.className = 'dz-line-row';
-      const spacer = document.createElement('div');
-      spacer.className = 'dz-spacer';
-      spacer.style.width = (offsetKol * CW) + 'px';
-      row.appendChild(spacer);
-      const line = document.createElement('div');
-      line.className = 'dz-line-seg';
-      line.style.width = (MINUS_W + liczbaCyfr * CW) + 'px';
-      row.appendChild(line);
-      return row;
+    function mkLine(colPrawy) {
+      const line       = document.createElement('div');
+      line.className   = 'dz-line';
+      line.style.width = (OP_W + (colPrawy + 1) * COL_W) + 'px';
+      return line;
     }
 
-    // ════════════════════════════════════════
-    // KONTENER
-    // ════════════════════════════════════════
-    const container = document.createElement('div');
-    container.className = 'dz-container';
-    const inner = document.createElement('div');
-    inner.className = 'dz-inner';
-    container.appendChild(inner);
+    // ── LEWA SEKCJA (dzielna + kroki) ──
+    const left = document.createElement('div');
+    left.className = 'dz-left';
 
-    // ════════════════════════════════════════
-    // NAGŁÓWEK — tradycyjny kąt polski:
-    //   [Wiersz 1] spacer + pola cyfr wyniku (wyrównane do siatki dzielnej)
-    //   [Wiersz 2] kreska pod wynikiem
-    //   [Wiersz 3] [dzielnik|kąt] cyfry dzielnej
-    // ════════════════════════════════════════
-
-    // Dynamicznie mierz szerokość dzielnik-box przez treść
-    // Szacujemy: ~18px na cyfrę + 14px padding lewy + 10px padding prawy
-    const dzielnikSzer = String(b).length * 20 + 24;
-
-    // Wiersz 1: pola wyniku — wyrównane pod kolumnami dzielnej
-    const wynRow = document.createElement('div');
-    wynRow.className = 'dz-row';
-    // Spacer: szerokość dzielnika + pierwsze "puste" kolumny dzielnej
-    const wynSpacerEl = document.createElement('div');
-    wynSpacerEl.className = 'dz-spacer';
-    wynSpacerEl.style.width = (dzielnikSzer + (pierwsze - 1) * CW) + 'px';
-    wynRow.appendChild(wynSpacerEl);
-    for (let k = 0; k < sW.length; k++) {
-      wynRow.appendChild(mkInput('w' + k, sW[k], 'dz-input--wynik'));
-    }
-    inner.appendChild(wynRow);
-
-    // Kreska pozioma pod wynikiem (od krawędzi dzielnika do końca dzielnej)
-    const sepLine = document.createElement('div');
-    sepLine.style.cssText =
-      'height:2.5px;background:#334155;border-radius:1px;' +
-      'margin-left:' + dzielnikSzer + 'px;' +
-      'width:' + (N * CW) + 'px;';
-    inner.appendChild(sepLine);
-
-    // Wiersz 2: dzielnik-box + cyfry dzielnej
-    const naglRow = document.createElement('div');
-    naglRow.className = 'dz-row';
-    naglRow.style.marginBottom = '2px';
-    const dzielnikBox = document.createElement('div');
-    dzielnikBox.className = 'dz-dzielnik-box';
-    dzielnikBox.style.width = dzielnikSzer + 'px';
-    dzielnikBox.textContent = b;
-    naglRow.appendChild(dzielnikBox);
-    const dzielnaEl = document.createElement('div');
-    dzielnaEl.className = 'dz-dzielna-row';
+    const dzielnaRow = document.createElement('div');
+    dzielnaRow.className = 'dz-dzielna';
+    const opEmpty = document.createElement('div');
+    opEmpty.className = 'dz-op';
+    dzielnaRow.appendChild(opEmpty);
     sA.split('').forEach(c => {
-      const cell = document.createElement('div');
-      cell.className = 'dz-cyfra';
+      const cell       = document.createElement('div');
+      cell.className   = 'dz-c';
       cell.textContent = c;
-      dzielnaEl.appendChild(cell);
+      dzielnaRow.appendChild(cell);
     });
-    naglRow.appendChild(dzielnaEl);
-    inner.appendChild(naglRow);
-
-    // ════════════════════════════════════════
-    // KROKI — wyrównane pod siatką dzielnej
-    // ════════════════════════════════════════
-    const steps = document.createElement('div');
-    steps.className = 'dz-steps';
-    steps.style.marginLeft = dzielnikSzer + 'px';
+    left.appendChild(dzielnaRow);
 
     for (let k = 0; k < kroki.length; k++) {
       const { biezaca, colPrawy, mnozenie, nowaReszta } = kroki[k];
-      const sBiezaca = String(biezaca);
+      const sBiezaca  = String(biezaca);
       const sMnozenie = String(mnozenie);
-      const sReszta = String(nowaReszta);
+      const sReszta   = String(nowaReszta);
+      const isLast    = k === kroki.length - 1;
 
-      const mnColLewy = colPrawy - sMnozenie.length + 1;
-
-      // Wiersz bieżącej (od kroku 1 wzwyż) — liczba którą aktualnie dzielimy
+      // Bieżąca liczba (k > 0)
       if (k > 0) {
-        const aktColLewy = colPrawy - sBiezaca.length + 1;
-        const rowAkt = mkRow(aktColLewy, false);
-        const aktInp = mkInput('akt' + k, biezaca, 'dz-input--akt');
-        aktInp.style.width = (sBiezaca.length * CW) + 'px';
-        rowAkt.appendChild(aktInp);
-        steps.appendChild(rowAkt);
+        const rowAkt = mkSRow(colPrawy, false);
+        sBiezaca.split('').forEach((c, ci) => {
+          rowAkt.appendChild(mkInp('akt' + k + '_' + ci, c, 'dz-f--akt'));
+        });
+        left.appendChild(rowAkt);
       }
 
-      // Wiersz mnożenia (cyfra_wyniku × dzielnik)
-      const rowMn = mkRow(mnColLewy, true);
-      const mnInp = mkInput('mn' + k, mnozenie, 'dz-input--mn');
-      mnInp.style.width = (sMnozenie.length * CW) + 'px';
-      rowMn.appendChild(mnInp);
-      steps.appendChild(rowMn);
+      // Mnożenie
+      const rowMn = mkSRow(colPrawy, true);
+      sMnozenie.split('').forEach((c, ci) => {
+        rowMn.appendChild(mkInp('mn' + k + '_' + ci, c, 'dz-f--mn'));
+      });
+      left.appendChild(rowMn);
 
-      // Kreska pod mnożeniem
-      steps.appendChild(mkLine(mnColLewy, sMnozenie.length));
+      left.appendChild(mkLine(colPrawy));
 
-      // Wiersz reszty — KLUCZOWY NOWY KROK!
-      // Jest to wynik odejmowania: bieżąca − mnożenie
-      const jestOstatni = k === kroki.length - 1;
-      const resztaColLewy = colPrawy - sReszta.length + 1;
-      const resztaId = jestOstatni ? 'r' : ('reszt' + k);
-      const rowReszta = mkRow(resztaColLewy, false);
-      const resztaInp = mkInput(resztaId, nowaReszta, 'dz-input--reszta');
-      resztaInp.style.width = (sReszta.length * CW) + 'px';
-      rowReszta.appendChild(resztaInp);
-      if (jestOstatni && resztaKoncowa > 0) {
-        const lbl = document.createElement('span');
-        lbl.className = 'dz-reszta-label';
-        lbl.textContent = '← r.';
-        rowReszta.appendChild(lbl);
+      // Reszta
+      const rowR = mkSRow(colPrawy, false);
+      sReszta.split('').forEach((c, ci) => {
+        rowR.appendChild(mkInp(
+          (isLast ? 'r' : 'reszt' + k) + '_' + ci,
+          c, 'dz-f--reszta'
+        ));
+      });
+      if (isLast && resztaKoncowa > 0) {
+        const lbl       = document.createElement('div');
+        lbl.className   = 'dz-r-label';
+        lbl.textContent = 'r.';
+        rowR.appendChild(lbl);
       }
-      steps.appendChild(rowReszta);
+      left.appendChild(rowR);
     }
 
-    inner.appendChild(steps);
-    sl.appendChild(container);
+    // ── PRAWA SEKCJA (dzielnik + wynik) ──
+    const right = document.createElement('div');
+    right.className = 'dz-right';
 
-    // Zapamiętaj sekwencję do nawigacji
+    const dzielnikEl       = document.createElement('div');
+    dzielnikEl.className   = 'dz-dzielnik';
+    dzielnikEl.textContent = b;
+    right.appendChild(dzielnikEl);
+
+    const wynikRow       = document.createElement('div');
+    wynikRow.className   = 'dz-wynik';
+    sW.split('').forEach((c, ci) => {
+      wynikRow.appendChild(mkInp('w' + ci, c, 'dz-f--wynik'));
+    });
+    right.appendChild(wynikRow);
+
+    // ── Złóż ──
+    const outer       = document.createElement('div');
+    outer.className   = 'dz-outer';
+    outer.appendChild(left);
+    outer.appendChild(right);
+
+    const wrap       = document.createElement('div');
+    wrap.className   = 'dz-wrap';
+    wrap.appendChild(outer);
+    sl.appendChild(wrap);
+
     sl._dzSekwencja = sekwencja;
 
     setTimeout(() => {
-      const f = document.getElementById('dz-w0');
+      const f = document.getElementById(sekwencja[0]);
       if (f) f.focus();
     }, 200);
   }
 
-  // Przejdź do następnego pola w sekwencji dzielenia
-  function przejdzDz(currentId) {
-    const sl = document.getElementById('slupek');
-    const seq = sl._dzSekwencja || [];
-    const fullId = 'dz-' + currentId;
-    const idx = seq.indexOf(fullId);
-    if (idx >= 0 && idx < seq.length - 1) {
-      const nxt = document.getElementById(seq[idx + 1]);
-      if (nxt) nxt.focus();
-    } else if (idx === seq.length - 1) {
-      sprawdz();
-    }
-  }
 
-  // Cofnij do poprzedniego pola w sekwencji dzielenia
-  function cofnijDz(currentId) {
-    const sl = document.getElementById('slupek');
-    const seq = sl._dzSekwencja || [];
-    const fullId = 'dz-' + currentId;
-    const idx = seq.indexOf(fullId);
-    if (idx > 0) {
-      const prev = document.getElementById(seq[idx - 1]);
-      if (prev) { prev.focus(); prev.value = ''; }
-    }
-  }
 
   function renderSlupek() {
     const sl = document.getElementById('slupek');
