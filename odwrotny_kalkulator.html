@@ -447,7 +447,7 @@
     .modal-przycisk.err:hover { background: #b91c1c; }
     .modal-przycisk:active { transform: scale(0.97); }
 
-    /* ── DZIELENIE PISEMNE ── */
+    /* ── DZIELENIE PISEMNE (wynik nad dzielną) ── */
     .dz-wrap {
       overflow-x: auto;
       display: flex;
@@ -455,17 +455,25 @@
       padding: 4px 0;
     }
 
-    .dz-outer {
+    /* Kolumna pionowa całego działania */
+    .dz-outer-col {
       display: inline-flex;
-      flex-direction: row;
-      align-items: flex-start;
-    }
-
-    /* Lewa część: dzielna + kroki */
-    .dz-left {
-      display: flex;
       flex-direction: column;
       flex-shrink: 0;
+    }
+
+    /* Wiersz wyniku (nad dzielną) — flex-start z padding-left */
+    .dz-wynik-top {
+      display: flex;
+      align-items: center;
+    }
+
+    /* Kreska pod wynikiem */
+    .dz-line-header {
+      height: 2.5px;
+      background: #334155;
+      border-radius: 1px;
+      margin: 0;
     }
 
     /* Wiersz dzielnej */
@@ -474,7 +482,7 @@
       align-items: center;
     }
 
-    /* Pojedyncza statyczna cyfra */
+    /* Statyczna cyfra (z dzielnej lub sprowadzona) */
     .dz-c {
       width: 44px;
       height: 48px;
@@ -488,7 +496,32 @@
       flex-shrink: 0;
     }
 
-    /* Kolumna operatora (minus lub puste) */
+    /* Cyfra sprowadzona (podkreślona, wyodrębniona) */
+    .dz-c--sprowadzona {
+      color: #0369a1;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    /* Dwukropek i dzielnik */
+    .dz-colon {
+      font-family: 'DM Mono', monospace;
+      font-size: 28px;
+      font-weight: 400;
+      color: #334155;
+      padding: 0 8px;
+      line-height: 48px;
+      flex-shrink: 0;
+    }
+    .dz-dzielnik-txt {
+      font-family: 'DM Mono', monospace;
+      font-size: 28px;
+      font-weight: 500;
+      color: #1c1917;
+      flex-shrink: 0;
+    }
+
+    /* Kolumna operatora (minus) */
     .dz-op {
       width: 32px;
       height: 44px;
@@ -502,7 +535,7 @@
       flex-shrink: 0;
     }
 
-    /* Wiersz kroku (mnożenie / reszta / bieżąca) */
+    /* Wiersz kroku (flex-end + padding-right) */
     .dz-srow {
       display: flex;
       align-items: center;
@@ -517,32 +550,6 @@
       background: #334155;
       border-radius: 1px;
       margin: 1px 0;
-      flex-shrink: 0;
-    }
-
-    /* Prawa część: dzielnik + wynik */
-    .dz-right {
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-      border-left: 3px solid #334155;
-    }
-
-    .dz-dzielnik {
-      height: 48px;
-      display: flex;
-      align-items: center;
-      padding: 0 10px 0 6px;
-      font-family: 'DM Mono', monospace;
-      font-size: 28px;
-      font-weight: 500;
-      color: #1c1917;
-      border-bottom: 2.5px solid #334155;
-      flex-shrink: 0;
-    }
-
-    .dz-wynik {
-      display: flex;
       flex-shrink: 0;
     }
 
@@ -567,7 +574,6 @@
     .dz-f:focus {
       border-bottom-color: #2563eb;
       background: #eff6ff;
-      border-radius: 4px 4px 0 0;
     }
     .dz-f--wynik  { color: #2563eb; border-bottom-color: #93c5fd; height: 48px; background: #f0f7ff; }
     .dz-f--wynik:focus { background: #dbeafe; }
@@ -910,32 +916,28 @@
 
     const OP_W  = 32;
     const COL_W = 44;
-
-    const sA = String(a);
-    const sW = String(wynik);
-    const N  = sA.length;
-    const M  = sW.length;
+    const sA    = String(a);
+    const sW    = String(wynik);
+    const N     = sA.length;
+    const M     = sW.length;
     const leftW = OP_W + N * COL_W;
-
     const pierwsze = N - M + 1;
+
+    // Oblicz kroki
     const kroki = [];
     let resztaKrok = 0, poz = 0;
     for (let k = 0; k < M; k++) {
-      let biezaca, colPrawy;
-      if (k === 0) {
-        biezaca  = parseInt(sA.slice(0, pierwsze));
-        colPrawy = pierwsze - 1;
-        poz      = pierwsze;
-      } else {
-        biezaca  = resztaKrok * 10 + parseInt(sA[poz]);
-        colPrawy = poz;
-        poz++;
-      }
-      const cyfraWyniku = parseInt(sW[k]);
-      const mnozenie    = cyfraWyniku * b;
-      const nowaReszta  = biezaca - mnozenie;
-      kroki.push({ biezaca, colPrawy, mnozenie, nowaReszta });
-      resztaKrok = nowaReszta;
+      let colPrawy;
+      if (k === 0) { colPrawy = pierwsze - 1; poz = pierwsze; }
+      else         { resztaKrok = kroki[k-1].nowaReszta; colPrawy = poz; poz++; }
+      const biezaca       = k === 0
+        ? parseInt(sA.slice(0, pierwsze))
+        : kroki[k-1].nowaReszta * 10 + parseInt(sA[colPrawy]);
+      const cyfraWyniku   = parseInt(sW[k]);
+      const mnozenie      = cyfraWyniku * b;
+      const nowaReszta    = biezaca - mnozenie;
+      const sprowadzona   = k < M - 1 ? sA[poz] : null; // cyfra schodząca po tym kroku
+      kroki.push({ colPrawy, mnozenie, nowaReszta, sprowadzona, biezaca });
     }
 
     const sekwencja = [];
@@ -943,12 +945,8 @@
     function mkInp(rawId, oczek, klasa) {
       const id  = 'dz-' + rawId;
       const inp = document.createElement('input');
-      inp.type         = 'text';
-      inp.inputMode    = 'numeric';
-      inp.maxLength    = 1;
-      inp.className    = 'dz-f ' + klasa;
-      inp.id           = id;
-      inp.autocomplete = 'off';
+      inp.type = 'text'; inp.inputMode = 'numeric'; inp.maxLength = 1;
+      inp.className = 'dz-f ' + klasa; inp.id = id; inp.autocomplete = 'off';
       dzPolaInfo.push({ id, oczekiwana: String(oczek) });
       sekwencja.push(id);
       inp.addEventListener('input', function() {
@@ -968,125 +966,117 @@
       if (nxt >= 0 && nxt < sekwencja.length) {
         const el = document.getElementById(sekwencja[nxt]);
         if (el) { if (dir === -1) el.value = ''; el.focus(); }
-      } else if (dir === 1 && idx === sekwencja.length - 1) {
-        sprawdz();
-      }
+      } else if (dir === 1 && idx === sekwencja.length - 1) { sprawdz(); }
     }
 
-    // Wiersz kroku: padding-right wyrównuje ostatnią cyfrę do kolumny colPrawy
+    // Wiersz kroków z flex-end + padding-right
     function mkSRow(colPrawy, hasMinus) {
       const row = document.createElement('div');
-      row.className      = 'dz-srow';
-      row.style.width    = leftW + 'px';
+      row.className = 'dz-srow';
+      row.style.width = leftW + 'px';
       row.style.paddingRight = ((N - 1 - colPrawy) * COL_W) + 'px';
       if (hasMinus) {
         const m = document.createElement('div');
-        m.className   = 'dz-op';
-        m.textContent = '−';
+        m.className = 'dz-op'; m.textContent = '−';
         row.appendChild(m);
       }
       return row;
     }
 
     function mkLine(colPrawy) {
-      const line       = document.createElement('div');
-      line.className   = 'dz-line';
+      const line = document.createElement('div');
+      line.className = 'dz-line';
       line.style.width = (OP_W + (colPrawy + 1) * COL_W) + 'px';
       return line;
     }
 
-    // ── LEWA SEKCJA (dzielna + kroki) ──
-    const left = document.createElement('div');
-    left.className = 'dz-left';
-
-    const dzielnaRow = document.createElement('div');
-    dzielnaRow.className = 'dz-dzielna';
-    const opEmpty = document.createElement('div');
-    opEmpty.className = 'dz-op';
-    dzielnaRow.appendChild(opEmpty);
-    sA.split('').forEach(c => {
-      const cell       = document.createElement('div');
-      cell.className   = 'dz-c';
-      cell.textContent = c;
-      dzielnaRow.appendChild(cell);
-    });
-    left.appendChild(dzielnaRow);
-
-    for (let k = 0; k < kroki.length; k++) {
-      const { biezaca, colPrawy, mnozenie, nowaReszta } = kroki[k];
-      const sBiezaca  = String(biezaca);
-      const sMnozenie = String(mnozenie);
-      const sReszta   = String(nowaReszta);
-      const isLast    = k === kroki.length - 1;
-
-      // Bieżąca liczba (k > 0)
-      if (k > 0) {
-        const rowAkt = mkSRow(colPrawy, false);
-        sBiezaca.split('').forEach((c, ci) => {
-          rowAkt.appendChild(mkInp('akt' + k + '_' + ci, c, 'dz-f--akt'));
-        });
-        left.appendChild(rowAkt);
-      }
-
-      // Mnożenie
-      const rowMn = mkSRow(colPrawy, true);
-      sMnozenie.split('').forEach((c, ci) => {
-        rowMn.appendChild(mkInp('mn' + k + '_' + ci, c, 'dz-f--mn'));
-      });
-      left.appendChild(rowMn);
-
-      left.appendChild(mkLine(colPrawy));
-
-      // Reszta
-      const rowR = mkSRow(colPrawy, false);
-      sReszta.split('').forEach((c, ci) => {
-        rowR.appendChild(mkInp(
-          (isLast ? 'r' : 'reszt' + k) + '_' + ci,
-          c, 'dz-f--reszta'
-        ));
-      });
-      if (isLast && resztaKoncowa > 0) {
-        const lbl       = document.createElement('div');
-        lbl.className   = 'dz-r-label';
-        lbl.textContent = 'r.';
-        rowR.appendChild(lbl);
-      }
-      left.appendChild(rowR);
+    // Wiersz reszty + sprowadzonej cyfry (nie ostatni krok)
+    // reszta at colPrawy, sprowadzona at colPrawy+1
+    function mkResztaPlusRow(colPrawy) {
+      const row = document.createElement('div');
+      row.className = 'dz-srow';
+      row.style.width = leftW + 'px';
+      row.style.paddingRight = ((N - 2 - colPrawy) * COL_W) + 'px';
+      return row;
     }
 
-    // ── PRAWA SEKCJA (dzielnik + wynik) ──
-    const right = document.createElement('div');
-    right.className = 'dz-right';
-
-    const dzielnikEl       = document.createElement('div');
-    dzielnikEl.className   = 'dz-dzielnik';
-    dzielnikEl.textContent = b;
-    right.appendChild(dzielnikEl);
-
-    const wynikRow       = document.createElement('div');
-    wynikRow.className   = 'dz-wynik';
-    sW.split('').forEach((c, ci) => {
-      wynikRow.appendChild(mkInp('w' + ci, c, 'dz-f--wynik'));
-    });
-    right.appendChild(wynikRow);
-
-    // ── Złóż ──
-    const outer       = document.createElement('div');
-    outer.className   = 'dz-outer';
-    outer.appendChild(left);
-    outer.appendChild(right);
-
-    const wrap       = document.createElement('div');
-    wrap.className   = 'dz-wrap';
+    // ── ZŁOŻ ──
+    const wrap  = document.createElement('div');  wrap.className  = 'dz-wrap';
+    const outer = document.createElement('div');  outer.className = 'dz-outer-col';
     wrap.appendChild(outer);
+
+    // 1. WYNIK (nad dzielną)
+    const wynikRow = document.createElement('div');
+    wynikRow.className = 'dz-wynik-top';
+    wynikRow.style.paddingLeft = (OP_W + (pierwsze - 1) * COL_W) + 'px';
+    sW.split('').forEach((c, ci) => wynikRow.appendChild(mkInp('w' + ci, c, 'dz-f--wynik')));
+    outer.appendChild(wynikRow);
+
+    // 2. KRESKA pod wynikiem
+    const headerLine = document.createElement('div');
+    headerLine.className = 'dz-line-header';
+    headerLine.style.width = (N * COL_W) + 'px';
+    headerLine.style.marginLeft = OP_W + 'px';
+    outer.appendChild(headerLine);
+
+    // 3. DZIELNA : DZIELNIK
+    const dzRow = document.createElement('div');  dzRow.className = 'dz-dzielna';
+    const opEmp = document.createElement('div');  opEmp.className = 'dz-op';
+    dzRow.appendChild(opEmp);
+    sA.split('').forEach(c => {
+      const cell = document.createElement('div');
+      cell.className = 'dz-c'; cell.textContent = c;
+      dzRow.appendChild(cell);
+    });
+    const colon = document.createElement('div');
+    colon.className = 'dz-colon'; colon.textContent = ':';
+    dzRow.appendChild(colon);
+    const dzTxt = document.createElement('div');
+    dzTxt.className = 'dz-dzielnik-txt'; dzTxt.textContent = b;
+    dzRow.appendChild(dzTxt);
+    outer.appendChild(dzRow);
+
+    // 4. KROKI
+    for (let k = 0; k < kroki.length; k++) {
+      const { colPrawy, mnozenie, nowaReszta, sprowadzona } = kroki[k];
+      const sMn   = String(mnozenie);
+      const isLast = k === kroki.length - 1;
+
+      // Mnożenie (z minusem)
+      const rowMn = mkSRow(colPrawy, true);
+      sMn.split('').forEach((c, ci) => rowMn.appendChild(mkInp('mn' + k + '_' + ci, c, 'dz-f--mn')));
+      outer.appendChild(rowMn);
+
+      // Kreska
+      outer.appendChild(mkLine(colPrawy));
+
+      if (!isLast) {
+        // Reszta zero-padowana do długości biezacej + cyfra sprowadzona
+        const biezacaLen  = String(kroki[k].biezaca).length;
+        const resztaPad   = String(nowaReszta).padStart(biezacaLen, '0');
+        const rowR = mkResztaPlusRow(colPrawy);
+        resztaPad.split('').forEach((c, ci) =>
+          rowR.appendChild(mkInp('reszt' + k + '_' + ci, c, 'dz-f--reszta'))
+        );
+        rowR.appendChild(mkInp('sprwd' + k, sprowadzona, 'dz-f--akt'));
+        outer.appendChild(rowR);
+
+      } else {
+        // Końcowa reszta
+        const rowR = mkSRow(colPrawy, false);
+        rowR.appendChild(mkInp('r_0', nowaReszta, 'dz-f--reszta'));
+        if (resztaKoncowa > 0) {
+          const lbl = document.createElement('div');
+          lbl.className = 'dz-r-label'; lbl.textContent = 'r.';
+          rowR.appendChild(lbl);
+        }
+        outer.appendChild(rowR);
+      }
+    }
+
     sl.appendChild(wrap);
-
     sl._dzSekwencja = sekwencja;
-
-    setTimeout(() => {
-      const f = document.getElementById(sekwencja[0]);
-      if (f) f.focus();
-    }, 200);
+    setTimeout(() => { const f = document.getElementById(sekwencja[0]); if (f) f.focus(); }, 200);
   }
 
 
