@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kalkulator Pisemny</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: #0f172a;
+      background-image: linear-gradient(rgba(99,102,241,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.15) 1px, transparent 1px);
+      background-size: 40px 40px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .karta {
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
+      padding: 2.5rem 2.5rem 2rem;
+      width: 100%;
+      max-width: 420px;
+      animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .naglowek { margin-bottom: 1.5rem; }
+
+    .etykieta {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #c4bfb9;
+      margin-bottom: 4px;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 500;
+      color: #1c1917;
+      letter-spacing: -0.02em;
+    }
+
+    .wybor-dzialania {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 1.75rem;
+    }
+
+    .przycisk-dzialania {
+      padding: 10px 0;
+      font-family: 'DM Mono', monospace;
+      font-size: 20px;
+      font-weight: 500;
+      border-radius: 12px;
+      border: 2px solid #e7e4df;
+      background: #ffffff;
+      color: #78716c;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .przycisk-dzialania:hover {
+      border-color: #2563eb;
+      color: #2563eb;
+      background: #eff6ff;
+    }
+
+    .przycisk-dzialania.aktywny {
+      border-color: #2563eb;
+      background: #2563eb;
+      color: #ffffff;
+    }
+
+    .slupek-owijka {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2rem;
+      min-height: 180px;
+      align-items: center;
+    }
+
+    .slupek {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    /* ── PRZENIESIENIA (dodawanie) ── */
+    .rzad-przeniesien {
+      display: flex;
+      justify-content: flex-end;
+      min-height: 18px;
+      margin-bottom: 2px;
+    }
+
+    .odstep-przeniesien { width: 40px; }
+
+    .komorka-przeniesien {
+      width: 52px;
+      text-align: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      color: #d97706;
+      line-height: 18px;
+    }
+
+    /* ── POŻYCZANIE (odejmowanie) ── */
+    .rzad-pozyczania {
+      display: flex;
+      justify-content: flex-end;
+      min-height: 20px;
+      margin-bottom: 0;
+    }
+
+    .odstep-pozyczania { width: 40px; }
+
+    .komorka-pozyczania {
+      width: 52px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 0 4px;
+      box-sizing: border-box;
+    }
+
+    .pozyczana-przekreslona {
+      color: #94a3b8;
+      text-decoration: line-through;
+    }
+
+    .pozyczana-nowa {
+      color: #dc2626;
+      font-weight: 700;
+    }
+
+    .pozyczana-dziesiatka {
+      color: #dc2626;
+      font-weight: 700;
+      font-size: 11px;
+    }
+
+    /* ── LICZBY ── */
+    .rzad-liczb { display: flex; align-items: center; }
+
+    .komorka-operatora {
+      width: 40px;
+      text-align: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 30px;
+      font-weight: 400;
+      color: #2563eb;
+      line-height: 56px;
+    }
+
+    .cyfry { display: flex; }
+
+    .cyfra {
+      width: 52px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 32px;
+      font-weight: 500;
+      color: #1c1917;
+      animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+
+    .cyfra.pozyczona-od {
+      color: #94a3b8;
+      text-decoration: line-through;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.7); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .rzad-kreski {
+      width: 100%;
+      padding-left: 40px;
+      margin: 4px 0 6px;
+    }
+
+    .kreska {
+      height: 2px;
+      background: #1c1917;
+      border-radius: 1px;
+      transform-origin: left;
+      animation: growLine 0.4s cubic-bezier(0.16,1,0.3,1) both 0.1s;
+    }
+
+    @keyframes growLine {
+      from { transform: scaleX(0); }
+      to   { transform: scaleX(1); }
+    }
+
+    /* ── POLA ODPOWIEDZI ── */
+    .rzad-odpowiedzi { display: flex; align-items: center; }
+    .cyfry-odpowiedzi { display: flex; }
+
+    .pole-odpowiedzi {
+      width: 52px;
+      height: 56px;
+      font-family: 'DM Mono', monospace;
+      font-size: 32px;
+      font-weight: 500;
+      text-align: center;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid #e7e4df;
+      color: #2563eb;
+      outline: none;
+      padding: 0;
+      transition: border-color 0.2s, background 0.2s;
+      border-radius: 0;
+      caret-color: #2563eb;
+    }
+
+    .pole-odpowiedzi:focus {
+      border-bottom-color: #2563eb;
+      background: #eff6ff;
+    }
+
+    .pole-odpowiedzi.poprawne {
+      color: #16a34a;
+      border-bottom-color: #16a34a;
+      animation: bounceField 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .pole-odpowiedzi.bledne {
+      color: #dc2626;
+      border-bottom-color: #dc2626;
+      animation: shake 0.4s ease;
+    }
+
+    @keyframes bounceField {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%     { transform: translateX(-4px); }
+      40%     { transform: translateX(4px); }
+      60%     { transform: translateX(-4px); }
+      80%     { transform: translateX(2px); }
+    }
+
+    /* ── PRZYCISK ── */
+    .przycisk {
+      width: 100%;
+      padding: 14px;
+      margin-top: 1.5rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      border-radius: 14px;
+      border: none;
+      background: #2563eb;
+      color: #ffffff;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+      box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+    }
+
+    .przycisk:hover {
+      background: #1d4ed8;
+      box-shadow: 0 4px 16px rgba(37,99,235,0.35);
+    }
+
+    .przycisk:active { transform: scale(0.97); }
+
+    /* ── FEEDBACK ── */
+    .informacja {
+      margin-top: 1rem;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none;
+    }
+
+    .informacja.show { opacity: 1; transform: translateY(0); }
+    .informacja.ok  { background: #f0fdf4; color: #16a34a; }
+    .informacja.err { background: #fef2f2; color: #dc2626; }
+
+    /* ── STATYSTYKI ── */
+    .statystyki {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 1.75rem;
+    }
+
+    .pozycja-stat {
+      background: #f1f5f9;
+      border-radius: 12px;
+      padding: 12px 8px;
+      text-align: center;
+    }
+
+    .liczba-stat {
+      font-family: 'DM Mono', monospace;
+      font-size: 24px;
+      font-weight: 500;
+      color: #1c1917;
+    }
+
+    .liczba-stat.skok { animation: statBump 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+
+    @keyframes statBump {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.35); }
+      100% { transform: scale(1); }
+    }
+
+    .etykieta-stat {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #c4bfb9;
+      margin-top: 2px;
+    }
+
+    /* ── PASEK ── */
+    .pasek-owijka { margin-top: 1.25rem; }
+
+    .pasek-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #c4bfb9;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .pasek-tor {
+      height: 5px;
+      background: #e7e4df;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .pasek-wypelnienie {
+      height: 100%;
+      background: linear-gradient(90deg, #2563eb, #7c3aed);
+      border-radius: 99px;
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    /* ── MODAL ── */
+    .modal-tlo {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-tlo.widoczny { opacity: 1; pointer-events: all; }
+    .modal {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 320px;
+      text-align: center;
+      transform: scale(0.85) translateY(20px);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+    }
+    .modal-tlo.widoczny .modal { transform: scale(1) translateY(0); }
+    .modal-ikona {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 32px;
+    }
+    .modal-ikona.ok  { background: #f0fdf4; color: #16a34a; }
+    .modal-ikona.err { background: #fef2f2; color: #dc2626; }
+    .modal-tytul {
+      font-size: 20px;
+      font-weight: 500;
+      color: #1c1917;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .modal-tekst {
+      font-size: 14px;
+      color: #78716c;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+    .modal-przycisk {
+      width: 100%;
+      padding: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .modal-przycisk.ok  { background: #16a34a; color: #ffffff; }
+    .modal-przycisk.ok:hover  { background: #15803d; }
+    .modal-przycisk.err { background: #dc2626; color: #ffffff; }
+    .modal-przycisk.err:hover { background: #b91c1c; }
+    .modal-przycisk:active { transform: scale(0.97); }
+
+    /* ── DZIELENIE SŁUPKOWE (grid) ── */
+    .dz-container {
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: visible;
+      padding-bottom: 4px;
+    }
+
+    .dz-inner {
+      display: inline-block;
+      min-width: 100%;
+    }
+
+    .dz-header {
+      display: flex;
+      align-items: flex-end;
+      margin-bottom: 0;
+    }
+
+    .dz-wynik-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 2px;
+    }
+
+    .dz-dzielnik-box {
+      display: flex;
+      align-items: center;
+      padding: 0 10px 0 4px;
+      height: 48px;
+      font-family: 'DM Mono', monospace;
+      font-size: 28px;
+      font-weight: 500;
+      color: #1c1917;
+      border-right: 2.5px solid #334155;
+      border-bottom: 2.5px solid #334155;
+      flex-shrink: 0;
+    }
+
+    .dz-dzielna-row {
+      display: flex;
+    }
+
+    .dz-cyfra {
+      width: 44px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 28px;
+      font-weight: 500;
+      color: #1c1917;
+    }
+
+    .dz-steps {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dz-row {
+      display: flex;
+      align-items: center;
+      min-height: 42px;
+    }
+
+    .dz-spacer {
+      flex-shrink: 0;
+    }
+
+    .dz-minus-cell {
+      width: 28px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 22px;
+      font-weight: 600;
+      color: #2563eb;
+      flex-shrink: 0;
+    }
+
+    .dz-no-minus {
+      width: 28px;
+      flex-shrink: 0;
+    }
+
+    .dz-line-row {
+      display: flex;
+      align-items: center;
+      margin: 1px 0;
+    }
+
+    .dz-line-seg {
+      height: 2.5px;
+      background: #334155;
+      border-radius: 1px;
+      flex-shrink: 0;
+    }
+
+    .dz-input {
+      height: 42px;
+      font-family: 'DM Mono', monospace;
+      font-size: 26px;
+      font-weight: 500;
+      text-align: center;
+      background: #f1f5f9;
+      border: none;
+      border-bottom: 2.5px solid #cbd5e1;
+      border-radius: 6px 6px 0 0;
+      outline: none;
+      padding: 0;
+      transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+      caret-color: #2563eb;
+      flex-shrink: 0;
+    }
+
+    .dz-input:focus {
+      border-bottom-color: #2563eb;
+      background: #eff6ff;
+      box-shadow: 0 3px 10px rgba(37,99,235,0.15);
+    }
+
+    .dz-input.poprawne { color: #16a34a !important; border-bottom-color: #16a34a !important; background: #f0fdf4; }
+    .dz-input.bledne   { color: #dc2626 !important; border-bottom-color: #dc2626 !important; background: #fef2f2; animation: shake 0.4s ease; }
+
+    .dz-input--wynik  { color: #2563eb; border-bottom-color: #93c5fd; }
+    .dz-input--mn     { color: #d97706; border-bottom-color: #fcd34d; }
+    .dz-input--reszta { color: #7c3aed; border-bottom-color: #c4b5fd; }
+    .dz-input--akt    { color: #0369a1; border-bottom-color: #7dd3fc; }
+
+    .dz-reszta-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      color: #7c3aed;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-left: 6px;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+<div class="karta">
+  <div class="naglowek">
+    <div class="etykieta">Odwrotny kalkulator</div>
+    <h1 id="tytul-dzialania">Dodawanie pisemne</h1>
+  </div>
+
+  <div class="wybor-dzialania">
+    <button class="przycisk-dzialania aktywny" onclick="zmienDzialanie('dodawanie', this)">+</button>
+    <button class="przycisk-dzialania" onclick="zmienDzialanie('odejmowanie', this)">−</button>
+    <button class="przycisk-dzialania" onclick="zmienDzialanie('mnozenie', this)">×</button>
+    <button class="przycisk-dzialania" onclick="zmienDzialanie('dzielenie', this)">÷</button>
+  </div>
+
+  <div class="slupek-owijka">
+    <div class="slupek" id="slupek"></div>
+  </div>
+
+  <button class="przycisk" onclick="sprawdz()">Sprawdź odpowiedź</button>
+
+  <div class="informacja" id="informacja"></div>
+
+  <div class="statystyki">
+    <div class="pozycja-stat">
+      <div class="liczba-stat" id="l-poprawne">0</div>
+      <div class="etykieta-stat">Poprawne</div>
+    </div>
+    <div class="pozycja-stat">
+      <div class="liczba-stat" id="l-bledne">0</div>
+      <div class="etykieta-stat">Błędne</div>
+    </div>
+    <div class="pozycja-stat">
+      <div class="liczba-stat" id="l-seria">0</div>
+      <div class="etykieta-stat">Seria</div>
+    </div>
+  </div>
+
+  <div class="pasek-owijka">
+    <div class="pasek-meta">
+      <span>Skuteczność</span>
+      <span id="tekst-proc">—</span>
+    </div>
+    <div class="pasek-tor">
+      <div class="pasek-wypelnienie" id="pasek-bar"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-tlo" id="modal-tlo">
+  <div class="modal">
+    <div class="modal-ikona" id="modal-ikona"></div>
+    <div class="modal-tytul" id="modal-tytul"></div>
+    <div class="modal-tekst" id="modal-tekst"></div>
+    <button class="modal-przycisk" id="modal-przycisk" onclick="zamknijModal()"></button>
+  </div>
+</div>
+
+<script>
+  let a = 0, b = 0, wynik = 0, resztaKoncowa = 0, poprawne = 0, bledne = 0, seria = 0;
+  let dzialanie = 'dodawanie';
+
+  const nazwyDzialan = {
+    dodawanie:   'Dodawanie pisemne',
+    odejmowanie: 'Odejmowanie pisemne',
+    mnozenie:    'Mnożenie pisemne',
+    dzielenie:   'Dzielenie pisemne',
+  };
+
+  const symboleDzialan = {
+    dodawanie:   '+',
+    odejmowanie: '−',
+    mnozenie:    '×',
+    dzielenie:   '÷',
+  };
+
+  function zmienDzialanie(nowe, btn) {
+    dzialanie = nowe;
+    document.querySelectorAll('.przycisk-dzialania').forEach(b => b.classList.remove('aktywny'));
+    btn.classList.add('aktywny');
+    document.getElementById('tytul-dzialania').textContent = nazwyDzialan[nowe];
+    losuj();
+  }
+
+  function losujLiczby() {
+    if (dzialanie === 'dodawanie') {
+      // 10 liczb o losowej długości (1–4 cyfry)
+      a = [];
+      for (let k = 0; k < 10; k++) {
+        const dlugosc = Math.floor(Math.random() * 4) + 1;
+        const min = Math.pow(10, dlugosc - 1);
+        const max = Math.pow(10, dlugosc) - 1;
+        a.push(Math.floor(Math.random() * (max - min + 1)) + min);
+      }
+      b = 0;
+      wynik = a.reduce((s, x) => s + x, 0);
+    } else if (dzialanie === 'odejmowanie') {
+      a = Math.floor(Math.random() * 9900) + 100;
+      b = Math.floor(Math.random() * (a - 1)) + 1;
+      wynik = a - b;
+    } else if (dzialanie === 'mnozenie') {
+      a = Math.floor(Math.random() * 90) + 10;
+      b = Math.floor(Math.random() * 90) + 10;
+      wynik = a * b;
+    } else if (dzialanie === 'dzielenie') {
+      b = Math.floor(Math.random() * 8) + 2;         // dzielnik 2–9
+      wynik = Math.floor(Math.random() * 900) + 100;  // wynik 3-cyfrowy
+      resztaKoncowa = Math.floor(Math.random() * b);  // reszta 0 do b-1
+      a = wynik * b + resztaKoncowa;
+    }
+  }
+
+  // Zwraca dla każdej kolumny: { przekreslona, nowa, dziesiatka }
+  // przekreslona = oryginalna cyfra A zanim się od niej pożyczyło
+  // nowa         = cyfra A po oddaniu pożyczki (o 1 mniej)
+  // dziesiatka   = true gdy ta kolumna dostała +10 z sąsiada
+  function obliczPozyczania(a, b, cols) {
+    const sA = String(a).padStart(cols, '0');
+    const sB = String(b).padStart(cols, '0');
+    const cyfryA = sA.split('').map(Number);
+
+    // Najpierw obliczamy końcowy stan wszystkich cyfr po wszystkich pożyczkach
+    for (let i = cols - 1; i >= 0; i--) {
+      if (cyfryA[i] < parseInt(sB[i])) {
+        let j = i - 1;
+        if (j >= 0) {
+          cyfryA[j] -= 1;
+          cyfryA[i] += 10;
+        }
+      }
+    }
+
+    // Teraz budujemy info: porównujemy stan końcowy z oryginalnym
+    const sAOryg = sA.split('').map(Number);
+    const info = Array.from({length: cols}, () => ({ przekreslona: null, nowa: null, dziesiatka: false }));
+
+    for (let i = 0; i < cols; i++) {
+      const oryg = sAOryg[i];
+      const konc = cyfryA[i];
+      if (konc > oryg) {
+        // dostała +10 — pokaż końcową wartość, oryginał bez zmian więc bez przekreślenia
+        info[i].dziesiatka = true;
+        info[i].wartoscKonc = konc;
+      } else if (konc < oryg && konc >= 0) {
+        // oddała pożyczkę bez dostawania — przekreśl w wierszu A
+        info[i].przekreslona = oryg;
+        info[i].nowa = konc;
+      }
+      // kolumna która i oddała i dostała: konc może być > oryg po +10 ale < oryg+10
+      // wykrywamy to: konc > 9 (dostała +10) I jednocześnie cyfryA po odjęciu była zmniejszona
+    }
+
+    // Drugi przebieg: wykryj kolumny które i dostały +10 i oddały (konc+10 > oryg ale i tak oddały)
+    // Sprawdzamy: jeśli info[i].dziesiatka && sąsiad info[i-1] też ma przekreslona albo dziesiatka
+    // Prościej: porównaj stan pośredni — jeśli cyfra dostała +10 a jej wartość bez +10 != oryg, to oddała
+    const sAPosredni = sA.split('').map(Number);
+    // symulujemy tylko odejmowania (bez dodawania 10)
+    for (let i = cols - 1; i >= 0; i--) {
+      if (sAPosredni[i] < parseInt(sB[i])) {
+        if (i - 1 >= 0) sAPosredni[i - 1] -= 1;
+      }
+    }
+    for (let i = 0; i < cols; i++) {
+      if (info[i].dziesiatka && sAPosredni[i] !== sAOryg[i]) {
+        // ta kolumna dostała +10 ale też oddała — przekreśl oryginał w wierszu A
+        info[i].przekreslonaA = sAOryg[i];
+      }
+    }
+
+    return info;
+  }
+
+  function obliczPrzenoszeniesMnozenia(a, b, cols) {
+    // mnożymy a × b (b jednocyfrowe), zbieramy przeniesienia kolumna po kolumnie od prawej
+    const sA = String(a).padStart(cols, '0');
+    const pr = new Array(cols).fill(0);
+    let carry = 0;
+    for (let i = cols - 1; i >= 0; i--) {
+      const iloczyn = parseInt(sA[i]) * b + carry;
+      carry = Math.floor(iloczyn / 10);
+      pr[i] = carry > 0 ? carry : 0;
+      carry = carry; // przeniesienie do następnej kolumny
+    }
+    // pr[i] to przeniesienie które wchodzi do kolumny i z prawej
+    // przeliczamy jeszcze raz żeby pokazać przeniesienie NA daną kolumnę (z prawej sąsiada)
+    const prWejscie = new Array(cols).fill(0);
+    let c = 0;
+    for (let i = cols - 1; i >= 0; i--) {
+      const iloczyn = parseInt(sA[i]) * b + c;
+      c = Math.floor(iloczyn / 10);
+      if (i > 0) prWejscie[i - 1] = c;
+    }
+    return prWejscie;
+  }
+
+  function obliczPrzeniesienia(a, b, cols) {
+    const sA = String(a).padStart(cols, '0');
+    const sB = String(b).padStart(cols, '0');
+    const pr = new Array(cols).fill(0);
+    let carry = 0;
+    for (let i = cols - 1; i >= 0; i--) {
+      const s = parseInt(sA[i]) + parseInt(sB[i]) + carry;
+      carry = Math.floor(s / 10);
+      if (i > 0) pr[i - 1] = carry;
+    }
+    return pr;
+  }
+
+  function dodajRzadLiczb(sl, liczba, symbol, opoznienie) {
+    const rzad = document.createElement('div');
+    rzad.className = 'rzad-liczb';
+    const op = document.createElement('div');
+    op.className = 'komorka-operatora';
+    op.textContent = symbol;
+    rzad.appendChild(op);
+    const cyfry = document.createElement('div');
+    cyfry.className = 'cyfry';
+    String(liczba).split('').forEach((c, i) => {
+      const d = document.createElement('div');
+      d.className = 'cyfra';
+      d.style.animationDelay = (opoznienie + i * 0.04) + 's';
+      d.textContent = c;
+      cyfry.appendChild(d);
+    });
+    rzad.appendChild(cyfry);
+    sl.appendChild(rzad);
+  }
+
+  function dodajRzadLiczbPadowany(sl, liczba, symbol, cols, opoznienie) {
+    const rzad = document.createElement('div');
+    rzad.className = 'rzad-liczb';
+    const op = document.createElement('div');
+    op.className = 'komorka-operatora';
+    op.textContent = symbol;
+    rzad.appendChild(op);
+    const cyfry = document.createElement('div');
+    cyfry.className = 'cyfry';
+    const s = String(liczba).padStart(cols, ' ');
+    for (let i = 0; i < cols; i++) {
+      const d = document.createElement('div');
+      d.className = 'cyfra';
+      d.style.animationDelay = (opoznienie + i * 0.04) + 's';
+      d.textContent = s[i].trim();
+      cyfry.appendChild(d);
+    }
+    rzad.appendChild(cyfry);
+    sl.appendChild(rzad);
+  }
+
+  function dodajKreske(sl) {
+    const rzadK = document.createElement('div');
+    rzadK.className = 'rzad-kreski';
+    const k = document.createElement('div');
+    k.className = 'kreska';
+    rzadK.appendChild(k);
+    sl.appendChild(rzadK);
+  }
+
+  function dodajPola(sl, cols, odLewej) {
+    const rzad = document.createElement('div');
+    rzad.className = 'rzad-odpowiedzi';
+    const op = document.createElement('div');
+    op.className = 'komorka-operatora';
+    rzad.appendChild(op);
+    const cyfryOdp = document.createElement('div');
+    cyfryOdp.className = 'cyfry-odpowiedzi';
+    for (let i = 0; i < cols; i++) {
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.inputMode = 'numeric';
+      inp.maxLength = 1;
+      inp.className = 'pole-odpowiedzi';
+      inp.id = 'f-' + i;
+      inp.autocomplete = 'off';
+      const idx = i;
+      inp.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '').slice(-1);
+        if (this.value.length === 1) {
+          const nast = document.getElementById('f-' + (odLewej ? idx + 1 : idx - 1));
+          if (nast) nast.focus();
+        }
+      });
+      inp.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && this.value === '') {
+          const poprz = document.getElementById('f-' + (odLewej ? idx - 1 : idx + 1));
+          if (poprz) { poprz.focus(); poprz.value = ''; }
+        }
+        if (e.key === 'Enter') {
+          // zresetuj czerwone obramowania pól cząstkowych
+          document.querySelectorAll('.pole-czastkowe').forEach(p => {
+            p.style.borderBottomColor = p.style.color + '55';
+          });
+          sprawdz();
+        }
+      });
+      cyfryOdp.appendChild(inp);
+    }
+    rzad.appendChild(cyfryOdp);
+    sl.appendChild(rzad);
+    setTimeout(() => {
+      const f = document.getElementById('f-' + (odLewej ? 0 : cols - 1));
+      if (f) f.focus();
+    }, 200);
+  }
+
+  // Generuje wszystkie pola do klasycznego dzielenia słupkowego
+  // Każdy krok: cyfra wyniku, mnożenie, reszta
+  let dzPolaInfo = []; // {id, oczekiwana}
+
+  function poleDz(id, oczekiwana, klasa, szerInp) {
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.inputMode = 'numeric';
+    inp.maxLength = String(oczekiwana).length > 1 ? 2 : 1;
+    inp.className = 'dz-pole ' + klasa;
+    inp.id = 'dz-' + id;
+    inp.autocomplete = 'off';
+    inp.style.width = (szerInp || 40) + 'px';
+    dzPolaInfo.push({ id: 'dz-' + id, oczekiwana: String(oczekiwana) });
+    inp.addEventListener('input', function() {
+      this.value = this.value.replace(/[^0-9]/g, '').slice(0, inp.maxLength);
+    });
+    inp.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') sprawdz();
+    });
+    return inp;
+  }
+
+  function renderDzielenie(sl, a, b, wynik) {
+    dzPolaInfo = [];
+    sl.innerHTML = '';
+    sl.style.alignItems = 'flex-start';
+    sl.style.width = '100%';
+    sl.style.overflow = 'visible';
+
+    const sA = String(a);
+    const sW = String(wynik);
+    const N = sA.length;
+    const CW = 44;    // szerokość jednej kolumny cyfry (px)
+    const MINUS_W = 28; // szerokość kolumny z minusem
+
+    // Ile cyfr dzielnej bierze pierwszy krok
+    const pierwsze = N - sW.length + 1;
+
+    // Oblicz wszystkie kroki algorytmu
+    const kroki = [];
+    let resztaKrok = 0, poz = 0;
+    for (let k = 0; k < sW.length; k++) {
+      let biezaca, colPrawy;
+      if (k === 0) {
+        biezaca = parseInt(sA.slice(0, pierwsze));
+        colPrawy = pierwsze - 1;
+        poz = pierwsze;
+      } else {
+        biezaca = resztaKrok * 10 + parseInt(sA[poz]);
+        colPrawy = poz;
+        poz++;
+      }
+      const cyfraWyniku = parseInt(sW[k]);
+      const mnozenie = cyfraWyniku * b;
+      const nowaReszta = biezaca - mnozenie;
+      kroki.push({ biezaca, colPrawy, mnozenie, nowaReszta });
+      resztaKrok = nowaReszta;
+    }
+
+    // Sekwencyjna lista id pól (dla Tab/Enter nawigacji)
+    const sekwencja = [];
+
+    // ── Pomocnicze: input ──
+    function mkInput(id, oczek, klasa) {
+      const s = String(oczek);
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.inputMode = 'numeric';
+      inp.maxLength = s.length > 1 ? s.length : 1;
+      inp.className = 'dz-input ' + klasa;
+      inp.id = 'dz-' + id;
+      inp.autocomplete = 'off';
+      inp.style.width = (s.length * CW) + 'px';
+      inp.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '').slice(0, inp.maxLength);
+        if (this.value.length === inp.maxLength) przejdzDz(id);
+      });
+      inp.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') przejdzDz(id);
+        if (e.key === 'Backspace' && this.value === '') cofnijDz(id);
+      });
+      dzPolaInfo.push({ id: 'dz-' + id, oczekiwana: s });
+      sekwencja.push('dz-' + id);
+      return inp;
+    }
+
+    // ── Pomocnicze: wiersz z flex i offsetem ──
+    // offsetKol = ile pełnych kolumn CW od lewej (przed minusem/liczbą)
+    // hasMinus  = czy wstawić minus po lewej
+    function mkRow(offsetKol, hasMinus) {
+      const row = document.createElement('div');
+      row.className = 'dz-row';
+      const spacerW = (offsetKol * CW) + (hasMinus ? 0 : MINUS_W);
+      const spacer = document.createElement('div');
+      spacer.className = 'dz-spacer';
+      spacer.style.width = spacerW + 'px';
+      row.appendChild(spacer);
+      if (hasMinus) {
+        const m = document.createElement('div');
+        m.className = 'dz-minus-cell';
+        m.textContent = '−';
+        row.appendChild(m);
+      }
+      return row;
+    }
+
+    // ── Pomocnicze: kreska ──
+    function mkLine(offsetKol, liczbaCyfr) {
+      const row = document.createElement('div');
+      row.className = 'dz-line-row';
+      const spacer = document.createElement('div');
+      spacer.className = 'dz-spacer';
+      spacer.style.width = (offsetKol * CW) + 'px';
+      row.appendChild(spacer);
+      const line = document.createElement('div');
+      line.className = 'dz-line-seg';
+      line.style.width = (MINUS_W + liczbaCyfr * CW) + 'px';
+      row.appendChild(line);
+      return row;
+    }
+
+    // ════════════════════════════════════════
+    // KONTENER
+    // ════════════════════════════════════════
+    const container = document.createElement('div');
+    container.className = 'dz-container';
+    const inner = document.createElement('div');
+    inner.className = 'dz-inner';
+    container.appendChild(inner);
+
+    // ════════════════════════════════════════
+    // NAGŁÓWEK — tradycyjny kąt polski:
+    //   [Wiersz 1] spacer + pola cyfr wyniku (wyrównane do siatki dzielnej)
+    //   [Wiersz 2] kreska pod wynikiem
+    //   [Wiersz 3] [dzielnik|kąt] cyfry dzielnej
+    // ════════════════════════════════════════
+
+    // Dynamicznie mierz szerokość dzielnik-box przez treść
+    // Szacujemy: ~18px na cyfrę + 14px padding lewy + 10px padding prawy
+    const dzielnikSzer = String(b).length * 20 + 24;
+
+    // Wiersz 1: pola wyniku — wyrównane pod kolumnami dzielnej
+    const wynRow = document.createElement('div');
+    wynRow.className = 'dz-row';
+    // Spacer: szerokość dzielnika + pierwsze "puste" kolumny dzielnej
+    const wynSpacerEl = document.createElement('div');
+    wynSpacerEl.className = 'dz-spacer';
+    wynSpacerEl.style.width = (dzielnikSzer + (pierwsze - 1) * CW) + 'px';
+    wynRow.appendChild(wynSpacerEl);
+    for (let k = 0; k < sW.length; k++) {
+      wynRow.appendChild(mkInput('w' + k, sW[k], 'dz-input--wynik'));
+    }
+    inner.appendChild(wynRow);
+
+    // Kreska pozioma pod wynikiem (od krawędzi dzielnika do końca dzielnej)
+    const sepLine = document.createElement('div');
+    sepLine.style.cssText =
+      'height:2.5px;background:#334155;border-radius:1px;' +
+      'margin-left:' + dzielnikSzer + 'px;' +
+      'width:' + (N * CW) + 'px;';
+    inner.appendChild(sepLine);
+
+    // Wiersz 2: dzielnik-box + cyfry dzielnej
+    const naglRow = document.createElement('div');
+    naglRow.className = 'dz-row';
+    naglRow.style.marginBottom = '2px';
+    const dzielnikBox = document.createElement('div');
+    dzielnikBox.className = 'dz-dzielnik-box';
+    dzielnikBox.style.width = dzielnikSzer + 'px';
+    dzielnikBox.textContent = b;
+    naglRow.appendChild(dzielnikBox);
+    const dzielnaEl = document.createElement('div');
+    dzielnaEl.className = 'dz-dzielna-row';
+    sA.split('').forEach(c => {
+      const cell = document.createElement('div');
+      cell.className = 'dz-cyfra';
+      cell.textContent = c;
+      dzielnaEl.appendChild(cell);
+    });
+    naglRow.appendChild(dzielnaEl);
+    inner.appendChild(naglRow);
+
+    // ════════════════════════════════════════
+    // KROKI — wyrównane pod siatką dzielnej
+    // ════════════════════════════════════════
+    const steps = document.createElement('div');
+    steps.className = 'dz-steps';
+    steps.style.marginLeft = dzielnikSzer + 'px';
+
+    for (let k = 0; k < kroki.length; k++) {
+      const { biezaca, colPrawy, mnozenie, nowaReszta } = kroki[k];
+      const sBiezaca = String(biezaca);
+      const sMnozenie = String(mnozenie);
+      const sReszta = String(nowaReszta);
+
+      const mnColLewy = colPrawy - sMnozenie.length + 1;
+
+      // Wiersz bieżącej (od kroku 1 wzwyż) — liczba którą aktualnie dzielimy
+      if (k > 0) {
+        const aktColLewy = colPrawy - sBiezaca.length + 1;
+        const rowAkt = mkRow(aktColLewy, false);
+        const aktInp = mkInput('akt' + k, biezaca, 'dz-input--akt');
+        aktInp.style.width = (sBiezaca.length * CW) + 'px';
+        rowAkt.appendChild(aktInp);
+        steps.appendChild(rowAkt);
+      }
+
+      // Wiersz mnożenia (cyfra_wyniku × dzielnik)
+      const rowMn = mkRow(mnColLewy, true);
+      const mnInp = mkInput('mn' + k, mnozenie, 'dz-input--mn');
+      mnInp.style.width = (sMnozenie.length * CW) + 'px';
+      rowMn.appendChild(mnInp);
+      steps.appendChild(rowMn);
+
+      // Kreska pod mnożeniem
+      steps.appendChild(mkLine(mnColLewy, sMnozenie.length));
+
+      // Wiersz reszty — KLUCZOWY NOWY KROK!
+      // Jest to wynik odejmowania: bieżąca − mnożenie
+      const jestOstatni = k === kroki.length - 1;
+      const resztaColLewy = colPrawy - sReszta.length + 1;
+      const resztaId = jestOstatni ? 'r' : ('reszt' + k);
+      const rowReszta = mkRow(resztaColLewy, false);
+      const resztaInp = mkInput(resztaId, nowaReszta, 'dz-input--reszta');
+      resztaInp.style.width = (sReszta.length * CW) + 'px';
+      rowReszta.appendChild(resztaInp);
+      if (jestOstatni && resztaKoncowa > 0) {
+        const lbl = document.createElement('span');
+        lbl.className = 'dz-reszta-label';
+        lbl.textContent = '← r.';
+        rowReszta.appendChild(lbl);
+      }
+      steps.appendChild(rowReszta);
+    }
+
+    inner.appendChild(steps);
+    sl.appendChild(container);
+
+    // Zapamiętaj sekwencję do nawigacji
+    sl._dzSekwencja = sekwencja;
+
+    setTimeout(() => {
+      const f = document.getElementById('dz-w0');
+      if (f) f.focus();
+    }, 200);
+  }
+
+  // Przejdź do następnego pola w sekwencji dzielenia
+  function przejdzDz(currentId) {
+    const sl = document.getElementById('slupek');
+    const seq = sl._dzSekwencja || [];
+    const fullId = 'dz-' + currentId;
+    const idx = seq.indexOf(fullId);
+    if (idx >= 0 && idx < seq.length - 1) {
+      const nxt = document.getElementById(seq[idx + 1]);
+      if (nxt) nxt.focus();
+    } else if (idx === seq.length - 1) {
+      sprawdz();
+    }
+  }
+
+  // Cofnij do poprzedniego pola w sekwencji dzielenia
+  function cofnijDz(currentId) {
+    const sl = document.getElementById('slupek');
+    const seq = sl._dzSekwencja || [];
+    const fullId = 'dz-' + currentId;
+    const idx = seq.indexOf(fullId);
+    if (idx > 0) {
+      const prev = document.getElementById(seq[idx - 1]);
+      if (prev) { prev.focus(); prev.value = ''; }
+    }
+  }
+
+  function renderSlupek() {
+    const sl = document.getElementById('slupek');
+    sl.innerHTML = '';
+
+    if (dzialanie === 'dodawanie') {
+      const cols = String(wynik).length;
+
+      // rząd przeniesień — pola do wpisania ręcznie (max 1 cyfra)
+      const rzadP = document.createElement('div');
+      rzadP.className = 'rzad-pozyczania';
+      const offPr = document.createElement('div');
+      offPr.className = 'odstep-pozyczania';
+      rzadP.appendChild(offPr);
+      for (let i = 0; i < cols; i++) {
+        const kom = document.createElement('div');
+        kom.className = 'komorka-pozyczania';
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.inputMode = 'numeric';
+        inp.maxLength = 1;
+        inp.className = 'pole-odpowiedzi pole-przeniesienia';
+        inp.id = 'pr-' + i;
+        inp.autocomplete = 'off';
+        inp.style.width = '40px';
+        inp.style.height = '20px';
+        inp.style.fontSize = '13px';
+        inp.style.color = '#d97706';
+        inp.style.caretColor = '#d97706';
+        inp.style.borderBottomColor = '#d9770655';
+        inp.style.borderBottomWidth = '1.5px';
+        const colIdx = i;
+        inp.addEventListener('input', function() {
+          this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1);
+          if (this.value.length === 1) {
+            for (let nc = colIdx - 1; nc >= 0; nc--) {
+              const nxt = document.getElementById('pr-' + nc);
+              if (nxt) { nxt.focus(); break; }
+            }
+          }
+        });
+        inp.addEventListener('keydown', function(e) {
+          if (e.key === 'Backspace' && this.value === '') {
+            for (let nc = colIdx + 1; nc < cols; nc++) {
+              const prv = document.getElementById('pr-' + nc);
+              if (prv) { prv.focus(); break; }
+            }
+          }
+          if (e.key === 'Enter') {
+            const f = document.getElementById('f-' + (cols - 1));
+            if (f) f.focus();
+          }
+        });
+        kom.appendChild(inp);
+        rzadP.appendChild(kom);
+      }
+      sl.appendChild(rzadP);
+
+      // 10 wierszy liczb
+      a.forEach((liczba, idx) => {
+        const symbol = idx === a.length - 1 ? '+' : '';
+        dodajRzadLiczbPadowany(sl, liczba, symbol, cols, idx * 0.04);
+      });
+
+      dodajKreske(sl);
+      dodajPola(sl, cols, false);
+
+      // focus na pierwsze pole przeniesień od prawej
+      setTimeout(() => {
+        for (let i = cols - 1; i >= 0; i--) {
+          const p = document.getElementById('pr-' + i);
+          if (p) { p.focus(); break; }
+        }
+      }, 210);
+
+    } else if (dzialanie === 'odejmowanie') {
+      const cols = Math.max(String(a).length, String(b).length);
+      const sA = String(a).padStart(cols, '0');
+      const poz = obliczPozyczania(a, b, cols);
+
+      // rząd pożyczania — jedno pole na kolumnę, max 2 cyfry
+      const rzadPoz = document.createElement('div');
+      rzadPoz.className = 'rzad-pozyczania';
+      const offPoz = document.createElement('div');
+      offPoz.className = 'odstep-pozyczania';
+      rzadPoz.appendChild(offPoz);
+      for (let i = 0; i < cols; i++) {
+        const kom = document.createElement('div');
+        kom.className = 'komorka-pozyczania';
+        if (true) {
+          const inp = document.createElement('input');
+          inp.type = 'text';
+          inp.inputMode = 'numeric';
+          inp.maxLength = 2;
+          inp.className = 'pole-odpowiedzi pole-pozyczania';
+          inp.id = 'poz-' + i;
+          inp.autocomplete = 'off';
+          inp.style.width = '44px';
+          inp.style.height = '20px';
+          inp.style.fontSize = '13px';
+          inp.style.color = '#dc2626';
+          inp.style.caretColor = '#dc2626';
+          inp.style.borderBottomColor = '#dc262655';
+          inp.style.borderBottomWidth = '1.5px';
+          const colIdx = i;
+          inp.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '').slice(0, 2);
+            // pokaż/ukryj przekreślenie w wierszu A
+            const cyfrEl = document.getElementById('cyfrA-' + colIdx);
+            if (cyfrEl && cyfrEl.dataset.przekreslona === 'true') {
+              cyfrEl.classList.toggle('pozyczona-od', this.value.length > 0);
+            }
+          });
+          inp.addEventListener('keydown', function(e) {
+            if (e.key === 'Backspace' && this.value === '') {
+              // schowaj przekreślenie
+              const cyfrEl = document.getElementById('cyfrA-' + colIdx);
+              if (cyfrEl) cyfrEl.classList.remove('pozyczona-od');
+              // skocz w prawo
+              for (let nc = colIdx + 1; nc < cols; nc++) {
+                const prv = document.getElementById('poz-' + nc);
+                if (prv) { prv.focus(); break; }
+              }
+            }
+            if (e.key === 'Enter') {
+              // skocz do wiersza końcowego
+              const f = document.getElementById('f-' + (String(wynik).length - 1));
+              if (f) f.focus();
+            }
+          });
+          kom.appendChild(inp);
+        }
+        rzadPoz.appendChild(kom);
+      }
+      sl.appendChild(rzadPoz);
+
+      // focus startowy — pierwsze pole pożyczania od prawej
+      setTimeout(() => {
+        for (let i = cols - 1; i >= 0; i--) {
+          const p = document.getElementById('poz-' + i);
+          if (p) { p.focus(); break; }
+        }
+      }, 200);
+
+      // wiersz A — przekreślenia pojawiają się dynamicznie po wpisaniu pożyczania
+      const rA = document.createElement('div');
+      rA.className = 'rzad-liczb';
+      const opA = document.createElement('div');
+      opA.className = 'komorka-operatora';
+      rA.appendChild(opA);
+      const dA = document.createElement('div');
+      dA.className = 'cyfry';
+      for (let i = 0; i < cols; i++) {
+        const d = document.createElement('div');
+        d.className = 'cyfra';
+        d.style.animationDelay = (i * 0.04) + 's';
+        if (poz[i].przekreslona !== null || poz[i].przekreslonaA !== undefined) {
+          d.dataset.przekreslona = 'true';
+        }
+        d.id = 'cyfrA-' + i;
+        d.textContent = sA[i];
+        dA.appendChild(d);
+      }
+      rA.appendChild(dA);
+      sl.appendChild(rA);
+
+      dodajRzadLiczb(sl, b, '−', 0.08);
+      dodajKreske(sl);
+      dodajPola(sl, String(wynik).length, false);
+
+    } else if (dzialanie === 'mnozenie') {
+      const sB = String(b);
+      const cyfrB = sB.split('').map(Number);
+      const czesciowe = cyfrB.map((cy, idx) => a * cy * Math.pow(10, sB.length - 1 - idx));
+      const cols = String(wynik).length;
+
+      // przeniesienia dla pierwszego mnożenia (b jedności)
+      const prJedn = obliczPrzenoszeniesMnozenia(a, cyfrB[cyfrB.length - 1], cols);
+      // przeniesienia dla drugiego mnożenia (b dziesiątki) — przesunięte o 1 w lewo
+      let prDzies = null;
+      if (cyfrB.length > 1) {
+        const prDziesRaw = obliczPrzenoszeniesMnozenia(a, cyfrB[cyfrB.length - 2], cols);
+        // przesuwamy o 1 w lewo (bo wynik cząstkowy dziesiątek jest *10)
+        prDzies = new Array(cols).fill(0);
+        for (let i = 0; i < cols - 1; i++) prDzies[i] = prDziesRaw[i + 1];
+      }
+
+
+      const rzad_mnPr1 = document.createElement('div');
+      rzad_mnPr1.className = 'rzad-pozyczania';
+      rzad_mnPr1.style.marginBottom = '0';
+      const off_mnPr1 = document.createElement('div');
+      off_mnPr1.className = 'odstep-pozyczania';
+      rzad_mnPr1.appendChild(off_mnPr1);
+      for (let i = 0; i < cols; i++) {
+        const kom_mnPr1 = document.createElement('div');
+        kom_mnPr1.className = 'komorka-pozyczania';
+        const inp_mnPr1 = document.createElement('input');
+        inp_mnPr1.type = 'text';
+        inp_mnPr1.inputMode = 'numeric';
+        inp_mnPr1.maxLength = 1;
+        inp_mnPr1.className = 'pole-odpowiedzi pole-przeniesienia';
+        inp_mnPr1.id = 'mnPr1-' + i;
+        inp_mnPr1.autocomplete = 'off';
+        inp_mnPr1.style.width = '40px';
+        inp_mnPr1.style.height = '20px';
+        inp_mnPr1.style.fontSize = '13px';
+        inp_mnPr1.style.color = '#d97706';
+        inp_mnPr1.style.caretColor = '#d97706';
+        inp_mnPr1.style.borderBottomColor = '#d9770655';
+        inp_mnPr1.style.borderBottomWidth = '1.5px';
+        const colIdx_mnPr1 = i;
+        inp_mnPr1.addEventListener('input', function() {
+          this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1);
+          if (this.value.length === 1) {
+            for (let nc = colIdx_mnPr1 - 1; nc >= 0; nc--) {
+              const nxt = document.getElementById('mnPr1-' + nc);
+              if (nxt) { nxt.focus(); break; }
+            }
+          }
+        });
+        inp_mnPr1.addEventListener('keydown', function(e) {
+          if (e.key === 'Backspace' && this.value === '') {
+            for (let nc = colIdx_mnPr1 + 1; nc < cols; nc++) {
+              const prv = document.getElementById('mnPr1-' + nc);
+              if (prv) { prv.focus(); break; }
+            }
+          }
+        });
+        kom_mnPr1.appendChild(inp_mnPr1);
+        rzad_mnPr1.appendChild(kom_mnPr1);
+      }
+      sl.appendChild(rzad_mnPr1);
+
+      if (prDzies) {
+      const rzad_mnPr2 = document.createElement('div');
+      rzad_mnPr2.className = 'rzad-pozyczania';
+      const off_mnPr2 = document.createElement('div');
+      off_mnPr2.className = 'odstep-pozyczania';
+      rzad_mnPr2.appendChild(off_mnPr2);
+      for (let i = 0; i < cols; i++) {
+        const kom_mnPr2 = document.createElement('div');
+        kom_mnPr2.className = 'komorka-pozyczania';
+        const inp_mnPr2 = document.createElement('input');
+        inp_mnPr2.type = 'text';
+        inp_mnPr2.inputMode = 'numeric';
+        inp_mnPr2.maxLength = 1;
+        inp_mnPr2.className = 'pole-odpowiedzi pole-przeniesienia';
+        inp_mnPr2.id = 'mnPr2-' + i;
+        inp_mnPr2.autocomplete = 'off';
+        inp_mnPr2.style.width = '40px';
+        inp_mnPr2.style.height = '20px';
+        inp_mnPr2.style.fontSize = '13px';
+        inp_mnPr2.style.color = '#7c3aed';
+        inp_mnPr2.style.caretColor = '#7c3aed';
+        inp_mnPr2.style.borderBottomColor = '#7c3aed55';
+        inp_mnPr2.style.borderBottomWidth = '1.5px';
+        const colIdx_mnPr2 = i;
+        inp_mnPr2.addEventListener('input', function() {
+          this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1);
+          if (this.value.length === 1) {
+            for (let nc = colIdx_mnPr2 - 1; nc >= 0; nc--) {
+              const nxt = document.getElementById('mnPr2-' + nc);
+              if (nxt) { nxt.focus(); break; }
+            }
+          }
+        });
+        inp_mnPr2.addEventListener('keydown', function(e) {
+          if (e.key === 'Backspace' && this.value === '') {
+            for (let nc = colIdx_mnPr2 + 1; nc < cols; nc++) {
+              const prv = document.getElementById('mnPr2-' + nc);
+              if (prv) { prv.focus(); break; }
+            }
+          }
+        });
+        kom_mnPr2.appendChild(inp_mnPr2);
+        rzad_mnPr2.appendChild(kom_mnPr2);
+      }
+      sl.appendChild(rzad_mnPr2);
+      }
+
+      // wiersz A
+      dodajRzadLiczbPadowany(sl, a, '', cols, 0);
+      // wiersz B
+      dodajRzadLiczbPadowany(sl, b, '×', cols, 0.08);
+      dodajKreske(sl);
+
+      // pola na wyniki cząstkowe
+      // Odwracamy kolejność: najpierw jedności b (na górze), potem dziesiątki b (na dole z +)
+      // cyfrB[last] = jedności, cyfrB[0] = dziesiątki
+      const kolejnosc = [...czesciowe].reverse();
+      kolejnosc.forEach((czesc, idxWyswietl) => {
+        // idxWyswietl=0 to jedności b, idxWyswietl=1 to dziesiątki b
+        const zeraKoniec = idxWyswietl; // jedności: 0 zer, dziesiątki: 1 zero
+        const kolor = idxWyswietl === 0 ? '#d97706' : '#7c3aed';
+        const prefix = idxWyswietl === kolejnosc.length - 1 && kolejnosc.length > 1 ? '+' : '';
+        const rzadCz = document.createElement('div');
+        rzadCz.className = 'rzad-odpowiedzi';
+        const opCz = document.createElement('div');
+        opCz.className = 'komorka-operatora';
+        opCz.textContent = prefix;
+        opCz.style.color = kolor;
+        rzadCz.appendChild(opCz);
+        const dCz = document.createElement('div');
+        dCz.className = 'cyfry-odpowiedzi';
+        const wartCz = Math.round(czesc);
+        const sCz = String(wartCz).padStart(cols, ' ');
+        for (let i = 0; i < cols; i++) {
+          const pozycjaOdPrawej = cols - 1 - i;
+          if (sCz[i] === ' ') {
+            // wiodąca spacja — pusty placeholder
+            const puste = document.createElement('div');
+            puste.style.width = '52px';
+            puste.style.height = '56px';
+            puste.style.display = 'inline-block';
+            dCz.appendChild(puste);
+          } else if (pozycjaOdPrawej < zeraKoniec) {
+            // zero przesunięcia — zablokowane
+            const inp = document.createElement('input');
+            inp.type = 'text';
+            inp.className = 'pole-odpowiedzi pole-czastkowe';
+            inp.id = 'cz' + idxWyswietl + '-' + i;
+            inp.value = '0';
+            inp.disabled = true;
+            inp.style.color = '#c4bfb9';
+            inp.style.borderBottomColor = '#e7e4df';
+            dCz.appendChild(inp);
+          } else {
+            // aktywne pole
+            const inp = document.createElement('input');
+            inp.type = 'text';
+            inp.inputMode = 'numeric';
+            inp.maxLength = 1;
+            inp.className = 'pole-odpowiedzi pole-czastkowe';
+            inp.id = 'cz' + idxWyswietl + '-' + i;
+            inp.autocomplete = 'off';
+            inp.style.color = kolor;
+            inp.style.caretColor = kolor;
+            inp.style.borderBottomColor = kolor + '55';
+            const colI = i;
+            const iv = idxWyswietl;
+            inp.addEventListener('input', function() {
+              this.value = this.value.replace(/[^0-9]/g, '').slice(-1);
+              if (this.value.length === 1) {
+                // szukaj poprzedniego aktywnego pola w tym samym wierszu (w lewo)
+                let skoczono = false;
+                for (let prev = colI - 1; prev >= 0; prev--) {
+                  const p = document.getElementById('cz' + iv + '-' + prev);
+                  if (p && !p.disabled) { p.focus(); skoczono = true; break; }
+                }
+                // jeśli nie ma już pól w lewo — zostań, Enter przeniesie dalej
+              }
+            });
+            inp.addEventListener('keydown', function(e) {
+              if (e.key === 'Backspace' && this.value === '') {
+                let next = colI + 1;
+                while (next < cols) {
+                  const n = document.getElementById('cz' + iv + '-' + next);
+                  if (n && !n.disabled) { n.focus(); n.value = ''; break; }
+                  next++;
+                }
+              }
+              if (e.key === 'Enter') przejdzDoNastepnegoWiersza(iv, cols);
+            });
+            dCz.appendChild(inp);
+          }
+        }
+        rzadCz.appendChild(dCz);
+        sl.appendChild(rzadCz);
+      });
+
+      // przeniesienia dodawania wyników cząstkowych
+      const czest0 = Math.round(a * parseInt(String(b)[String(b).length - 1]));
+      const czest1 = Math.round(a * parseInt(String(b)[String(b).length - 2]) * 10);
+      const prDod = obliczPrzeniesienia(czest0, czest1, cols);
+
+      const rzad_mnPrDod = document.createElement('div');
+      rzad_mnPrDod.className = 'rzad-pozyczania';
+      rzad_mnPrDod.style.marginTop = '12px';
+      const off_mnPrDod = document.createElement('div');
+      off_mnPrDod.className = 'odstep-pozyczania';
+      rzad_mnPrDod.appendChild(off_mnPrDod);
+      for (let i = 0; i < cols; i++) {
+        const kom_mnPrDod = document.createElement('div');
+        kom_mnPrDod.className = 'komorka-pozyczania';
+        const inp_mnPrDod = document.createElement('input');
+        inp_mnPrDod.type = 'text';
+        inp_mnPrDod.inputMode = 'numeric';
+        inp_mnPrDod.maxLength = 1;
+        inp_mnPrDod.className = 'pole-odpowiedzi pole-przeniesienia';
+        inp_mnPrDod.id = 'mnPrDod-' + i;
+        inp_mnPrDod.autocomplete = 'off';
+        inp_mnPrDod.style.width = '40px';
+        inp_mnPrDod.style.height = '20px';
+        inp_mnPrDod.style.fontSize = '13px';
+        inp_mnPrDod.style.color = '#0ea5e9';
+        inp_mnPrDod.style.caretColor = '#0ea5e9';
+        inp_mnPrDod.style.borderBottomColor = '#0ea5e955';
+        inp_mnPrDod.style.borderBottomWidth = '1.5px';
+        const colIdx_mnPrDod = i;
+        inp_mnPrDod.addEventListener('input', function() {
+          this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1);
+          if (this.value.length === 1) {
+            for (let nc = colIdx_mnPrDod - 1; nc >= 0; nc--) {
+              const nxt = document.getElementById('mnPrDod-' + nc);
+              if (nxt) { nxt.focus(); break; }
+            }
+          }
+        });
+        inp_mnPrDod.addEventListener('keydown', function(e) {
+          if (e.key === 'Backspace' && this.value === '') {
+            for (let nc = colIdx_mnPrDod + 1; nc < cols; nc++) {
+              const prv = document.getElementById('mnPrDod-' + nc);
+              if (prv) { prv.focus(); break; }
+            }
+          }
+        });
+        kom_mnPrDod.appendChild(inp_mnPrDod);
+        rzad_mnPrDod.appendChild(kom_mnPrDod);
+      }
+      sl.appendChild(rzad_mnPrDod);
+
+      dodajKreske(sl);
+      dodajPola(sl, cols, false);
+
+      // focus na pierwsze aktywne pole cząstkowe (prawy kraniec wiersza 0)
+      setTimeout(() => {
+        for (let i = cols - 1; i >= 0; i--) {
+          const p = document.getElementById('cz0-' + i);
+          if (p) { p.focus(); break; }
+        }
+      }, 210);
+
+    } else if (dzialanie === 'dzielenie') {
+      renderDzielenie(sl, a, b, wynik);
+    }
+  }
+
+
+  function pokazModal(typ, tytul, tekst, labelPrzycisku) {
+    document.getElementById('modal-ikona').className = 'modal-ikona ' + typ;
+    document.getElementById('modal-ikona').textContent = typ === 'ok' ? '✓' : '✗';
+    document.getElementById('modal-tytul').textContent = tytul;
+    document.getElementById('modal-tekst').textContent = tekst;
+    const btn = document.getElementById('modal-przycisk');
+    btn.className = 'modal-przycisk ' + typ;
+    btn.textContent = labelPrzycisku;
+    document.getElementById('modal-tlo').classList.add('widoczny');
+  }
+
+  function zamknijModal() {
+    document.getElementById('modal-tlo').classList.remove('widoczny');
+  }
+
+  function bump(id) {
+    const el = document.getElementById(id);
+    el.classList.remove('skok');
+    void el.offsetWidth;
+    el.classList.add('skok');
+  }
+
+  function setFeedback(text, type) {
+    const fb = document.getElementById('informacja');
+    fb.textContent = text;
+    fb.className = 'informacja ' + type + ' show';
+  }
+
+  function hideFeedback() {
+    document.getElementById('informacja').classList.remove('show');
+  }
+
+  function losuj() {
+    losujLiczby();
+    hideFeedback();
+    renderSlupek();
+  }
+
+  function przejdzDoNastepnegoWiersza(iv, cols) {
+    // Sprawdź czy wszystkie aktywne pola w bieżącym wierszu są wypełnione
+    let wszystkieWypelnione = true;
+    for (let i = 0; i < cols; i++) {
+      const p = document.getElementById('cz' + iv + '-' + i);
+      if (p && !p.disabled && p.value === '') { wszystkieWypelnione = false; break; }
+    }
+    if (!wszystkieWypelnione) {
+      for (let i = 0; i < cols; i++) {
+        const p = document.getElementById('cz' + iv + '-' + i);
+        if (p && !p.disabled && p.value === '') p.style.borderBottomColor = '#dc2626';
+      }
+      return;
+    }
+    // szukaj pierwszego aktywnego pola od prawej w następnym wierszu cząstkowym
+    let skoczono = false;
+    for (let i = cols - 1; i >= 0; i--) {
+      const nast = document.getElementById('cz' + (iv + 1) + '-' + i);
+      if (nast && !nast.disabled) { nast.focus(); skoczono = true; break; }
+    }
+    if (!skoczono) {
+      // przejdź do wiersza końcowego — pierwsze aktywne pole od prawej
+      for (let i = cols - 1; i >= 0; i--) {
+        const f = document.getElementById('f-' + i);
+        if (f && !f.disabled) { f.focus(); break; }
+      }
+    }
+  }
+
+  function sprawdz() {
+    const cols = String(wynik).length;
+    const symbol = symboleDzialan[dzialanie];
+    let poprawnie = true;
+
+    // Sprawdź czy wszystkie aktywne pola są wypełnione
+    const dzPola = dzialanie === 'dzielenie' ? dzPolaInfo.map(x => document.getElementById(x.id)).filter(Boolean) : [];
+    const wszystkiePola = dzialanie === 'dzielenie'
+      ? dzPola
+      : document.querySelectorAll('.pole-odpowiedzi:not([disabled]):not(.pole-przeniesienia):not(.pole-pozyczania)');
+    let pustePolaIstnieja = false;
+    wszystkiePola.forEach(p => {
+      if (p.value === '') {
+        pustePolaIstnieja = true;
+        p.style.borderBottomColor = '#dc2626';
+      }
+    });
+    if (pustePolaIstnieja) {
+      pokazModal('err', 'Uzupełnij pola!', 'Wypełnij wszystkie pola przed sprawdzeniem.', 'OK');
+      return;
+    }
+
+    if (dzialanie === 'mnozenie') {
+      const sB = String(b);
+      const cyfrB = sB.split('').map(Number);
+      const czesciowe = cyfrB.map((cy, idx) => Math.round(a * cy * Math.pow(10, sB.length - 1 - idx)));
+
+      // sprawdź każdy wynik cząstkowy (kolejność wyświetlania: odwrócona)
+      const kolejnoscSpr = [...czesciowe].reverse();
+      kolejnoscSpr.forEach((czesc, idxWyswietl) => {
+        const wartCz = Math.round(czesc);
+        const sCz = String(wartCz).padStart(cols, ' ');
+        for (let i = 0; i < cols; i++) {
+          const inp = document.getElementById('cz' + idxWyswietl + '-' + i);
+          if (!inp || inp.disabled) continue;
+          const oczek = sCz[i];
+          if (inp.value !== oczek) {
+            poprawnie = false;
+            inp.classList.add('bledne');
+          } else {
+            inp.classList.add('poprawne');
+          }
+        }
+      });
+
+      // sprawdź wynik końcowy
+      let ans = '';
+      for (let i = 0; i < cols; i++) {
+        const v = document.getElementById('f-' + i);
+        ans += v ? (v.value || '_') : '_';
+      }
+      const fields = document.querySelectorAll('.pole-odpowiedzi:not(.pole-czastkowe)');
+      if (ans !== String(wynik)) {
+        poprawnie = false;
+        fields.forEach(f => f.classList.add('bledne'));
+      } else {
+        fields.forEach(f => f.classList.add('poprawne'));
+      }
+    } else if (dzialanie === 'dzielenie') {
+      // sprawdź wszystkie pola dzielenia
+      dzPolaInfo.forEach(({ id, oczekiwana }) => {
+        const inp = document.getElementById(id);
+        if (!inp) return;
+        if (inp.value === oczekiwana) {
+          inp.classList.add('poprawne');
+        } else {
+          poprawnie = false;
+          inp.classList.add('bledne');
+        }
+      });
+    } else {
+      // sprawdź pola przeniesień (dodawanie) — opcjonalne, nie blokują
+      if (dzialanie === 'dodawanie') {
+        // oblicz przeniesienia kumulatywnie dla wszystkich 10 liczb
+        let suma = 0;
+        const pr = new Array(cols).fill(0);
+        // policz przeniesienia kolumna po kolumnie od prawej
+        for (let col = cols - 1; col >= 0; col--) {
+          let sumaKolumny = 0;
+          a.forEach(liczba => {
+            const s = String(liczba).padStart(cols, '0');
+            sumaKolumny += parseInt(s[col]);
+          });
+          sumaKolumny += (col < cols - 1 ? pr[col] : 0);
+          if (col > 0) pr[col - 1] = Math.floor(sumaKolumny / 10);
+        }
+        // pr[i] = przeniesienie wchodzące do kolumny i
+        // sprawdzanie pominięte — pola przeniesień są opcjonalne
+      }
+      // sprawdź pola pożyczania (odejmowanie)
+      if (dzialanie === 'odejmowanie') {
+        const colsOdj = Math.max(String(a).length, String(b).length);
+        const pozOdj = obliczPozyczania(a, b, colsOdj);
+        for (let i = 0; i < colsOdj; i++) {
+          const { nowa, dziesiatka, wartoscKonc } = pozOdj[i];
+          const oczekiwana = dziesiatka ? String(wartoscKonc) : (nowa !== null ? String(nowa) : null);
+          if (!oczekiwana) continue;
+          const inp = document.getElementById('poz-' + i);
+          if (!inp) continue;
+          if (inp.value !== oczekiwana) {
+            poprawnie = false;
+            inp.classList.add('bledne');
+          } else {
+            inp.classList.add('poprawne');
+          }
+        }
+      }
+
+      // sprawdź wynik końcowy
+      let ans = '';
+      for (let i = 0; i < cols; i++) {
+        const v = document.getElementById('f-' + i);
+        ans += v ? (v.value || '_') : '_';
+      }
+      const fields = document.querySelectorAll('.pole-odpowiedzi:not(.pole-pozyczania)');
+      if (ans !== String(wynik)) {
+        poprawnie = false;
+        fields.forEach(f => f.classList.add('bledne'));
+      } else {
+        fields.forEach(f => f.classList.add('poprawne'));
+      }
+    }
+
+    if (poprawnie) {
+      let opisWyniku;
+      if (dzialanie === 'dodawanie') {
+        opisWyniku = 'Suma = ' + wynik;
+      } else if (dzialanie === 'dzielenie') {
+        opisWyniku = a + ' ÷ ' + b + ' = ' + wynik + (resztaKoncowa > 0 ? ' r. ' + resztaKoncowa : '');
+      } else {
+        opisWyniku = a + ' ' + symbol + ' ' + b + ' = ' + wynik;
+      }
+      pokazModal('ok', 'Dobrze!', opisWyniku, 'Następne zadanie');
+      poprawne++; seria++;
+      bump('l-poprawne'); bump('l-seria');
+      setTimeout(() => { zamknijModal(); losuj(); }, 1400);
+    } else {
+      let odpInfo;
+      if (dzialanie === 'dzielenie') {
+        odpInfo = a + ' ÷ ' + b + ' = ' + wynik + (resztaKoncowa > 0 ? ' r. ' + resztaKoncowa : '');
+      } else {
+        odpInfo = 'Poprawna odpowiedź: ' + wynik;
+      }
+      pokazModal('err', 'Nie zgadza się!', odpInfo, 'Rozumiem');
+      bledne++; seria = 0;
+      bump('l-bledne');
+      document.getElementById('l-seria').textContent = 0;
+      setTimeout(() => { zamknijModal(); losuj(); }, 2400);
+    }
+
+    document.getElementById('l-poprawne').textContent = poprawne;
+    document.getElementById('l-bledne').textContent = bledne;
+    document.getElementById('l-seria').textContent = seria;
+
+    const total = poprawne + bledne;
+    const proc = total > 0 ? Math.round((poprawne / total) * 100) : 0;
+    document.getElementById('pasek-bar').style.width = proc + '%';
+    document.getElementById('tekst-proc').textContent = proc + '%';
+  }
+
+  losuj();
+
+  document.getElementById('modal-tlo').addEventListener('click', function(e) {
+    if (e.target === this) zamknijModal();
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') zamknijModal();
+  });
+</script>
+</body>
+</html>
